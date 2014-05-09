@@ -20,7 +20,11 @@ Have *fun* with Public Transport ! (/s)
 # Credits #
 
 Data from [OpenStreetMap](http://www.openstreetmap.org) © OpenStreetMap contributors
+
 Pre-parsing done by the wonderful [Overpass API](http://wiki.openstreetmap.org/wiki/Overpass_API)
+
 Default server for queries [overpass-api.de](http://overpass-api.de/), which I hammered pretty hard during my tests, sorry !
+
 D3.js to generate plan's svg
+
 JQuery
