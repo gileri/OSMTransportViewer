@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>OSM Public Transport Inspector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="checkParams()" onhashchange="checkParams()">
+    <div id="header">
+        <a href="https://github.com/gileri/OSMTransportViewer"><h1>OSM Public Transport Inspector</h1></a>
+        <form action="javascript:dl()">
+            <input id="network" placeholder="network">
+            <input id="line"    placeholder="line">
+            Verbose
+            <input id="verbose" type="checkbox">
+            <input type=text id="api_c" list=servers 
+            placeholder="Overpass Server" value="overpass-api.de">
+            <datalist id=servers >
+               <option> overpass-api.de
+               <option> api.openstreetmap.fr
+            </datalist>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div id="load_text"></div>
+    <div id="content">
+    </div>
+    <script src="./d3.v3.min.js"></script>
+    <script src="./jquery-2.0.2.min.js"></script>
+    <script src="./transport.js"></script>
+</body>
+</html>

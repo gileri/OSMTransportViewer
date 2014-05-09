@@ -1,0 +1,12 @@
+a {
+    text-decoration: none;
+    color:green;
+}
+
+#header {
+    border-bottom: solid;
+    border-width: 1px;
+    padding-bottom: 0.5em;
+    margin-bottom: 0.5em;
+    display: inline-block;
+}
