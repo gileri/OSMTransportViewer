@@ -222,5 +222,5 @@ function download_svg() {
     //var tmp = document.getElementById("content");
     var svg = document.getElementsByTagName("svg")[0];
     var svg_xml = (new XMLSerializer).serializeToString(svg);
-    return("<a href-lang='image/svg+xml' href='data:image/svg+xml," + encodeURIComponent(svg_xml) + "' title='route.svg'>Download SVG file</a>");
+    return("<a href-lang='image/svg+xml' href=\"data:image/svg+xml," + encodeURIComponent(svg_xml) + "\" title='route.svg'>Download SVG file</a>");
 }
