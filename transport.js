@@ -1,5 +1,7 @@
 var osm_url = "https://www.openstreetmap.org/";
+var max_connections_displayed = 5;
 
+var type;
 var network;
 var line;
 var verbose;
@@ -11,43 +13,101 @@ var areas;
 var stops;
 
 function checkParams() {
-    var hash = window.location.hash.substring(1);
-    var params = hash.split("-");
-    if(params.length == 3) {
-        document.getElementById('network').value = params[0];
-        document.getElementById('line').value = params[1];
-        document.getElementById('verbose').checked = (params[2] == "v" ? true : false);
+
+    // Listen to request type selection change
+    $('#type').change(function() {
+        type = $('#type').val();
+        if(type == 'r') {
+            $('.s_input').hide();
+            $('.r_input').show();
+        } else if (type == 's') {
+            $('.r_input').hide();
+            $('.s_input').show();
+        }
+    });
+
+    // Try to infer query from URL
+
+    try {
+        // Strip the # first
+        var path = window.location.hash.substr(1).split('/');
+        var type = path[0];
+        var data = path[1].split('-');
+
+        $('#type').val(type); 
+
+        if(type == 'r') {
+            if(data.length != 3)
+                return;
+            $('#network').val(data[0]);
+            $('#line').val(data[1]);
+            $('#verbose').val(data[2]);
+        } else if (type == 's') {
+            if(data.length != 1)
+                return;
+            $('#stop').val(data[0]);
+        }
         dl();
+    } catch(err) {
+        // Invalid URL fragment, move along
+        console.log(err);
     }
+
 }
 
 function dl() {
-    network = document.getElementById('network').value;
-    line    = document.getElementById('line').value;
-    verbose = document.getElementById('verbose').checked;
-    api_c   = document.getElementById('api_c').value;
+    // Infer from inputs, supposedly valids
+    type = $('#type').val();
+    if(type == 'r') {
+        dlLine();
+    } else if (type == 's') {
+        dlStop();
+    }
+}
+
+function dlStop() {
+    // TODO
+
+    d3.select("svg").remove();
+}
+
+function dlLine() {
+    network = $('#network').val();
+    line    = $('#line').val();
+    verbose = $('#verbose').val();
+    api_c   = $('#api_c').val();
+
     switch(api_c) {
       case "overpass-api.de":
-        api = "https://overpass-api.de/api/interpreter";
-        break;
+      api = "https://overpass-api.de/api/interpreter";
+      break;
       case "api.openstreetmap.fr":
-        api = "http://api.openstreetmap.fr/oapi/interpreter";
-        break;
+      api = "http://api.openstreetmap.fr/oapi/interpreter";
+      break;
       default:
-        api=api_c;
-    }
-    params = network + '-' + line + '-' + (verbose ? "v" : "q");
+      api=api_c;
+  }
+  params = '#' + type + '/' + network + '-' + line + '-' + (verbose ? "v" : "q");
+
+    // Update fragment only if outdated, to avoid loops
     if (params !== window.location.hash)
-        window.location.hash = network + '-' + line + '-' + (verbose ? "v" : "q");
+        window.location.hash = params;
+
     var query = '[out:json];relation["type"="route_master"]["network"~"' + network + '",i]["ref"~"^' + line + '$",i];out;rel(r);out;node(r);out;relation(bn)["type"="public_transport"]["public_transport"="stop_area"];out;foreach(>>;relation(bn)[type=route];out;);';
-    console.log("Overpass query : " + query);
+    $("#overpass_query").val(query);
+    $("#overpass_query").show();
+
     var data  = {
         "data": query,
     };
-    document.getElementById("load_text").innerHTML = "Loading from Overpass API...";
+    $("#load_text").html("Loading from Overpass API...");
+
+    //Static data to test without straining Overpass servers
     //$.getJSON("./data.json", null, parse);
+    
     $.getJSON(api, data, parse);
 }
+
 function init_stop(id) {
     if(!stops[id]) {
         stops[id] = new Object();
@@ -58,11 +118,11 @@ function connections() {
     lines.forEach(function (l) {
         l.stops.forEach(function(m) {
             if(stops[m] && stops[m].area) {
-               if(!stops[m].area.connections)
-                   stops[m].area.connections = [];
-                stops[m].area.connections.push(l);
-            }
-        });
+             if(!stops[m].area.connections)
+                 stops[m].area.connections = [];
+             stops[m].area.connections.push(l);
+         }
+     });
     });
 }
 
@@ -71,46 +131,46 @@ function parse(data) {
     lines = [];
     areas = [];
     stops = [];
-    document.getElementById("load_text").innerHTML = "Parsing...";
+    $("#load_text").html("Parsing...");
     data.elements.forEach(function(e) {
-            if(e.type == "relation") {
+        if(e.type == "relation") {
             switch(e.tags.type) {
-            case "route_master":
-            route_masters.push(e);
-            case "route":
-            r = [];
-            r.tags = e.tags;
-            r.id = e.id;
-            r.stops = [];
-            e.members.forEach(function(m) {
-                if(m.role == "stop" || m.role == "stop_exit_only" || m.role == "stop_entry_only") {
-                    r.stops.push(m.ref);
-                }
+              case "route_master":
+                  route_masters.push(e);
+              case "route":
+                r = [];
+                r.tags = e.tags;
+                r.id = e.id;
+                r.stops = [];
+                e.members.forEach(function(m) {
+                    if(m.role == "stop" || m.role == "stop_exit_only" || m.role == "stop_entry_only") {
+                        r.stops.push(m.ref);
+                    }
 
-            });
-            lines[r.id] = r;
-            break;
-            case "public_transport":
-            areas[e.id] = e;
-            e.members.forEach( function(n) {
-                if(n.role == "stop") {
-                    init_stop(n.ref);
-                    stops[n.ref].area = e;
-                }
                 });
-            break;
+                lines[r.id] = r;
+                break;
+              case "public_transport":
+                areas[e.id] = e;
+                e.members.forEach( function(n) {
+                    if(n.role == "stop") {
+                        init_stop(n.ref);
+                        stops[n.ref].area = e;
+                    }
+                });
+                break;
             }
-            } else if(e.type == "node") {
-                init_stop(e.id);
-                stops[e.id].node = e;
-            }
+        } else if(e.type == "node") {
+            init_stop(e.id);
+            stops[e.id].node = e;
+        }
     });
-    connections();
-    render();
+connections();
+render();
 }
 
 function render() {
-    document.getElementById("load_text").innerHTML = "Rendering...";
+    $("#load_text").html("Rendering...");
     var font_size = 16;
     var step = 50;
     var stop_radius = 8;
@@ -131,11 +191,11 @@ function render() {
     delete line;
 
     var chart = d3.select("#content")
-        .append("svg:svg")
-        .attr("class", "chart")
-        .attr("width", step * max_stops + line_padding/2)
-        .attr("height", line_padding * route_master.members.length + stop_radius + font_size*10)
-        .attr("id", "svg");
+    .append("svg:svg")
+    .attr("class", "chart")
+    .attr("width", step * max_stops + line_padding/2)
+    .attr("height", line_padding * route_master.members.length + stop_radius + font_size*10)
+    .attr("id", "svg");
 
     var i = 0;
     route_master.members.forEach(function(line_id) {
@@ -174,44 +234,44 @@ function render() {
             node_url = osm_url + "node/" + stop_ref;
 
             chart.append("a")
-                .attr("xlink:href", node_url)
-                .append("circle")
-                .attr("cx", first_padding + j * step)
-                .attr("cy", (i+1) * line_padding)
-                .attr("r", stop_radius)
-                .attr("radius", "12")
-                .attr("fill", "red");
+            .attr("xlink:href", node_url)
+            .append("circle")
+            .attr("cx", first_padding + j * step)
+            .attr("cy", (i+1) * line_padding)
+            .attr("r", stop_radius)
+            .attr("radius", "12")
+            .attr("fill", "red");
 
             xtext = step * j + first_padding;
             ytext = (i+1) * line_padding - stop_radius;
             chart.append("a")
-                .attr("xlink:href", node_url)
-                .append("text")
-                .attr("x", xtext)
-                .attr("y", ytext)
-                .attr("fill", ((verbose && !area_found) ? "red" : "black"))
-                .attr("text-anchor", "beginning")
-                .attr("font-size", "16px")
-                .attr("transform", "rotate(" + "-45 " + xtext + " " + ytext + ")")
-                .text(text || "Missing stop_area");
+              .attr("xlink:href", node_url)
+              .append("text")
+              .attr("x", xtext)
+              .attr("y", ytext)
+              .attr("fill", ((verbose && !area_found) ? "red" : "black"))
+              .attr("text-anchor", "beginning")
+              .attr("font-size", "16px")
+              .attr("transform", "rotate(" + "-45 " + xtext + " " + ytext + ")")
+              .text(text || "Missing stop_area");
 
             var k = 1;
             var u = [];
             if(stop.area)
-            stop.area.connections.forEach(function(c) {
-                if(u.length < 5 && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
-                    chart.append("a")
-                      .attr("xlink:href", "#" + c.tags.network + "-" + c.tags.ref + "-" + (verbose ? "v" : "q"))
-                      .append("text")
+                stop.area.connections.forEach(function(c) {
+                    if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
+                        chart.append("a")
+                          .attr("xlink:href", "#" + c.tags.network + "-" + c.tags.ref + "-" + (verbose ? "v" : "q"))
+                          .append("text")
                           .attr("x", xtext)
                           .attr("y", ytext + 2 * stop_radius + k * font_size)
                           .attr("text-anchor", "middle")
                           .attr("font-size", font_size / 2 + "px")
                           .text(c.tags.ref);
-                    u.push(c.tags.ref);
-                    k++;
-                }
-            });
+                        u.push(c.tags.ref);
+                        k++;
+                    }
+                });
         }
         i++;
     });
@@ -219,7 +279,6 @@ function render() {
 }
 
 function download_svg() {
-    //var tmp = document.getElementById("content");
     var svg = document.getElementsByTagName("svg")[0];
     var svg_xml = (new XMLSerializer).serializeToString(svg);
     return("<a href-lang='image/svg+xml' href=\"data:image/svg+xml," + encodeURIComponent(svg_xml) + "\" title='route.svg'>Download SVG file</a>");
