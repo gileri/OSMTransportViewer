@@ -32,20 +32,20 @@ function checkParams() {
         // Strip the # first
         var path = window.location.hash.substr(1).split('/');
         var type = path[0];
-        var data = path[1].split('-');
+        var data = path[1].split('+');
 
         $('#type').val(type); 
 
         if(type == 'r') {
             if(data.length != 3)
                 return;
-            $('#network').val(data[0]);
-            $('#line').val(data[1]);
-            $('#verbose').val(data[2]);
+            $('#network').val(decodeURIComponent(data[0]));
+            $('#line').val(decodeURIComponent(data[1]));
+            $('#verbose').val(decodeURIComponent(data[2]));
         } else if (type == 's') {
             if(data.length != 1)
                 return;
-            $('#stop').val(data[0]);
+            $('#stop').val(decodeURIComponent(data[0]));
         }
         dl();
     } catch(err) {
@@ -57,6 +57,20 @@ function checkParams() {
 
 function dl() {
     // Infer from inputs, supposedly valids
+
+    var api_c   = $('#api_c').val();
+
+    switch(api_c) {
+      case "overpass-api.de":
+        api = "https://overpass-api.de/api/interpreter";
+        break;
+      case "api.openstreetmap.fr":
+        api = "http://api.openstreetmap.fr/oapi/interpreter";
+        break;
+      default:
+        api=api_c;
+    }
+
     type = $('#type').val();
     if(type == 'r') {
         dlLine();
@@ -67,31 +81,36 @@ function dl() {
 
 function dlStop() {
     // TODO
+    var stop = $('#stop').val();
+    if(isNaN(stop))
+        var query = "[out:json];rel[name~'" + stop + "',i];out tags;node(r:stop);rel(bn)[type=route];out tags;"
+    else
+        var query = "[out:json];rel(" + stop + ");out tags;node(r:stop);rel(bn)[type=route];out tags;"
+    $("#overpass_query").val(query);
+    $("#overpass_query").show();
 
-    d3.select("svg").remove();
+    var hash = '#' + type + '/' + encodeURIComponent(stop);
+    // Update fragment only if outdated, to avoid loops
+    if (hash != window.location.hash)
+        window.location.hash = hash;
+
+    var data  = {
+        "data": query,
+    };
+
+    $("#load_text").html("Loading from Overpass API...");
+    $.getJSON(api, data, parse_connections);
 }
 
 function dlLine() {
     network = $('#network').val();
     line    = $('#line').val();
     verbose = $('#verbose').val();
-    api_c   = $('#api_c').val();
 
-    switch(api_c) {
-      case "overpass-api.de":
-      api = "https://overpass-api.de/api/interpreter";
-      break;
-      case "api.openstreetmap.fr":
-      api = "http://api.openstreetmap.fr/oapi/interpreter";
-      break;
-      default:
-      api=api_c;
-  }
-  params = '#' + type + '/' + network + '-' + line + '-' + (verbose ? "v" : "q");
-
+    var hash = '#' + type + '/' + encodeURIComponent(network) + '+' + encodeURIComponent(line) + (verbose ? "+v" : "+q");
     // Update fragment only if outdated, to avoid loops
-    if (params !== window.location.hash)
-        window.location.hash = params;
+    if (hash != window.location.hash)
+        window.location.hash = hash;
 
     var query = '[out:json];relation["type"="route_master"]["network"~"' + network + '",i]["ref"~"^' + line + '$",i];out;rel(r);out;node(r);out;relation(bn)["type"="public_transport"]["public_transport"="stop_area"];out;foreach(>>;relation(bn)[type=route];out;);';
     $("#overpass_query").val(query);
@@ -169,6 +188,16 @@ connections();
 render();
 }
 
+function parse_connections(data) {
+    var stop = data.elements[0];
+    $("#content").html("<h2>Stop : " + stop.tags.name + ", network : " + stop.tags.network + "</h2><span>Available connections :</span>");
+    $("#content").append("<ul id='connections'></ul>");
+    data.elements.slice(1).forEach(function(e) {
+        $("#connections").append("<li><a href='#r/" + encodeURIComponent(e.tags.network) + '+' + encodeURIComponent(e.tags.ref) + (verbose ? "+v" : "+q") + "'>" + e.tags.name + "</a></li>");
+    });
+    $("#load_text").empty();
+}
+
 function render() {
     $("#load_text").html("Rendering...");
     var font_size = 16;
@@ -181,7 +210,8 @@ function render() {
 
     var route_master = route_masters[0];
 
-    d3.select("svg").remove();
+    //d3.select("svg").remove();
+    $("#content").empty();
 
     var line;
     route_master.members.forEach(function(l) {
@@ -212,13 +242,13 @@ function render() {
         .attr("stroke-linecap", "round")
 
         chart.append("a")
-        .attr("xlink:href", osm_url + 'relation/' + line.id)
-        .append("text")
-        .attr("x", 5)
-        .attr("y", i * line_padding + font_size + (i>0 ? connection_padding : 0))
-        .attr("font-size", font_size + "px")
-        .attr("fill", line_colour)
-        .text(line.tags.name + ' (' + line.tags.ref + ')');
+          .attr("xlink:href", osm_url + 'relation/' + line.id)
+          .append("text")
+          .attr("x", 5)
+          .attr("y", i * line_padding + font_size + (i>0 ? connection_padding : 0))
+          .attr("font-size", font_size + "px")
+          .attr("fill", line_colour)
+          .text(line.tags.name + ' (' + line.tags.ref + ')');
 
         for(var j=0; j<line.stops.length; j++) {
             var stop_ref = line.stops[j];
@@ -232,15 +262,19 @@ function render() {
                 area_found = false;
             }
             node_url = osm_url + "node/" + stop_ref;
+            if(stop.area)
+                point_url = "#s/" + stop.area.id;
+            else
+                point_url = osm_url + "node/" + stop_ref;
 
             chart.append("a")
-            .attr("xlink:href", node_url)
-            .append("circle")
-            .attr("cx", first_padding + j * step)
-            .attr("cy", (i+1) * line_padding)
-            .attr("r", stop_radius)
-            .attr("radius", "12")
-            .attr("fill", "red");
+              .attr("xlink:href", point_url)
+              .append("circle")
+              .attr("cx", first_padding + j * step)
+              .attr("cy", (i+1) * line_padding)
+              .attr("r", stop_radius)
+              .attr("radius", "12")
+              .attr("fill", "red");
 
             xtext = step * j + first_padding;
             ytext = (i+1) * line_padding - stop_radius;
@@ -261,7 +295,7 @@ function render() {
                 stop.area.connections.forEach(function(c) {
                     if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
                         chart.append("a")
-                          .attr("xlink:href", "#" + c.tags.network + "-" + c.tags.ref + "-" + (verbose ? "v" : "q"))
+                          .attr("xlink:href", "#r/" + c.tags.network + "-" + c.tags.ref + "-" + (verbose ? "v" : "q"))
                           .append("text")
                           .attr("x", xtext)
                           .attr("y", ytext + 2 * stop_radius + k * font_size)

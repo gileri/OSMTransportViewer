@@ -1,6 +1,6 @@
 a {
     text-decoration: none;
-    color:green;
+    color: green;
 }
 
 #header {
@@ -13,4 +13,9 @@ a {
 
 .hidden {
 	display: none;
+}
+
+h2 {
+	font-size: 1.2em;
+	color: green;
 }
