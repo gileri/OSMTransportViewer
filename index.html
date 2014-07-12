@@ -10,8 +10,13 @@
         <a href="https://github.com/gileri/OSMTransportViewer/blob/gh-pages/README.md"><h1>OSM Public Transport Viewer</h1></a>
         <a href="http://www.openstreetmap.org"><small>Transport data © OpenStreetMap contributors</small></a>
         <form action="javascript:dl()">
-            <input id="network" placeholder="network">
-            <input id="line"    placeholder="line">
+            <select id="type">
+              <option value="r">Routes</option>
+              <option value="s">Stop Area</option>
+            </select>
+            <input id="network" placeholder="network" class="r_input" />
+            <input id="line"    placeholder="line"    class="r_input" />
+            <input id="stop"    placeholder="stop"    class="s_input hidden" /> 
             Verbose
             <input id="verbose" type="checkbox">
             <input type=text id="api_c" list=servers 
@@ -23,7 +28,9 @@
             <input type="submit" value="Submit">
         </form>
     </div>
-    <div id="load_text"></div>
+    <div>
+        <span id="load_text"></span><input class="hidden" id="overpass_query" />
+    </div>
     <div id="content">
     </div>
     <script src="./d3.v3.min.js"></script>
