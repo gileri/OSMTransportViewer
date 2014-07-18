@@ -35,7 +35,6 @@ function checkParams() {
         var data = path[1].split('+');
 
         $('#type').val(type); 
-
         if(type == 'r') {
             if(data.length != 3)
                 return;
@@ -57,7 +56,6 @@ function checkParams() {
 
 function dl() {
     // Infer from inputs, supposedly valids
-
     var api_c   = $('#api_c').val();
 
     switch(api_c) {
@@ -295,7 +293,7 @@ function render() {
                 stop.area.connections.forEach(function(c) {
                     if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
                         chart.append("a")
-                          .attr("xlink:href", "#r/" + c.tags.network + "-" + c.tags.ref + "-" + (verbose ? "v" : "q"))
+                          .attr("xlink:href", "#r/" + c.tags.network + "+" + c.tags.ref + "+" + (verbose ? "v" : "q"))
                           .append("text")
                           .attr("x", xtext)
                           .attr("y", ytext + 2 * stop_radius + k * font_size)
