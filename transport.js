@@ -81,7 +81,7 @@ function dlStop() {
     // TODO
     var stop = $('#stop').val();
     if(isNaN(stop))
-        var query = "[out:json];rel[name~'" + stop + "',i];out tags;node(r:stop);rel(bn)[type=route];out tags;"
+        var query = "[out:json];rel[name~'" + stop + "',i][public_transport=stop_area];out tags;node(r:stop);rel(bn)[type=route];out tags;"
     else
         var query = "[out:json];rel(" + stop + ");out tags;node(r:stop);rel(bn)[type=route];out tags;"
     $("#overpass_query").val(query);
@@ -188,10 +188,11 @@ render();
 
 function parse_connections(data) {
     var stop = data.elements[0];
-    $("#content").html("<h2>Stop : " + stop.tags.name + ", network : " + stop.tags.network + "</h2><span>Available connections :</span>");
+    $("#content").html("<h2>Stop : " + stop.tags.name + (stop.tags.network ? (", network : " + stop.tags.network) : "" ) + "</h2><span>Available connections :</span>");
     $("#content").append("<ul id='connections'></ul>");
-    data.elements.slice(1).forEach(function(e) {
-        $("#connections").append("<li><a href='#r/" + encodeURIComponent(e.tags.network) + '+' + encodeURIComponent(e.tags.ref) + (verbose ? "+v" : "+q") + "'>" + e.tags.name + "</a></li>");
+    var stops = data.elements.slice(2);
+    stops.forEach(function(e) {
+        $("#connections").append("<li><a href='#r/" + encodeURIComponent(e.tags.network) + '+' + encodeURIComponent(e.tags.ref) + (verbose ? "+v" : "+q") + "'>" + e.tags.name + "</a><a href='" + osm_url + "relation/" + e.id + "'> [OSM]</a></li>");
     });
     $("#load_text").empty();
 }
