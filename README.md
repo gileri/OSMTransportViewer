@@ -10,6 +10,8 @@ Parses the "new" [schema](https://wiki.openstreetmap.org/wiki/Proposed_features/
 Open index.html (a working version is hosted by [Github](https://gileri.github.io/OSMTransportViewer/)),
 enter your public transport network name, the reference of the route and you're good !
 
+The simplest way to host it locally (on port 8000 by default) is to run "python3 -m http.server"
+
 The verbose parameter try to highlight stops with errors.
 You can change the Overpass API server to whichever you want (some don't have a valid SSL certificate and won't work in HTTPS)
 
