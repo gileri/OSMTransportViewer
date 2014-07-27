@@ -13,12 +13,21 @@
     </div>
     <div>
         <span id="load_text"></span><input class="hidden" id="overpass_query" />
-        <select id="netSelect">
-            <option value=""></option>
-        </select>
-        <select id="opSelect">
-            
-        </select>
+
+        <label>Network</label>
+        <input id="netSelect" type="text" list="netList" />
+        <datalist id="netList">
+        </datalist>
+
+        <label>Operator</label>
+        <input id="opSelect" type="text" list="opList" />
+        <datalist id="opList">
+        </datalist>
+
+        <label>Ref</label>
+        <input id="refSelect" type="text" list="refList" />
+        <datalist id="refList">
+        </datalist>
     </div>
     <div id="content">
         <button onclick="javascript:dlBbox()">Download</button>
