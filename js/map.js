@@ -38,9 +38,9 @@ var dlBbox = function() {
 	var net = $('#netSelect').val();
 	var ref = $('#refSelect').val();
 
-	var netstr = net ? ("[network=" + net + "]") : "";
-	var opstr = op ? ("[operator=" + op + "]") : "";
-	var refstr = ref ? ("[ref=" + ref + "]") : "";
+	var netstr = net ? ("[network='" + net + "']") : "";
+	var opstr = op ? ("[operator='" + op + "']") : "";
+	var refstr = ref ? ("[ref='" + ref + "]'") : "";
 
 	var query = "[timeout:45][out:json];rel[type=route](" + bbox + ")" + netstr + opstr + refstr + ";(._;>;);out;";
 	$.ajax(opapi, {
