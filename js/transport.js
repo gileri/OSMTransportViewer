@@ -120,7 +120,7 @@ function dlLine() {
     $("#load_text").html("Loading from Overpass API...");
 
     //Static data to test without straining Overpass servers
-    //$.getJSON("./data.json", null, parse);
+    //$.getJSON("./data/lines.json", null, parse);
     
     $.getJSON(api, data, parse);
 }
