@@ -12,7 +12,6 @@ var path_weight = 2;
 var stopIcon = L.icon({
     iconUrl: './img/stop.png',
     iconSize: [12, 12],
-    popupAnchor: [-3, -76],
 });
 
 var nodes = {};
@@ -101,7 +100,9 @@ var parseData = function(data) {
 				case "stop_exit_only":
 					L.marker([m.obj.lat, m.obj.lon], {
 						icon: stopIcon,
-					}).addTo(map);
+					}).bindPopup(
+						"<a href='" + osmUrl + "node/" + m.ref + "'>" + m.obj.tags.name + "</a>"
+					).addTo(map);
 					break;
 				case "":
 					if(m.type == "way") {
