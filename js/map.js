@@ -1,3 +1,5 @@
+// Copyright 2014 Éric Gillet <eric.gillet+gh@linuxw.info>
+
 var opapi = "http://api.openstreetmap.fr/oapi/interpreter";
 var osmUrl = "https://openstreetmap.org/";
 
