@@ -7,10 +7,10 @@ var line;
 var verbose;
 var chart;
 
-var route_masters;
-var lines;
-var areas;
-var stops;
+var route_masters = [];
+var lines = [];
+var areas = [];
+var stops = [];
 
 function checkParams() {
 
@@ -27,10 +27,10 @@ function checkParams() {
     });
 
     // Try to infer query from URL
-
     try {
         // Strip the # first
         var path = window.location.hash.substr(1).split('/');
+
         var type = path[0];
         var data = path[1].split('+');
 
@@ -78,7 +78,6 @@ function dl() {
 }
 
 function dlStop() {
-    // TODO
     var stop = $('#stop').val();
     if(isNaN(stop))
         var query = "[out:json];rel[name~'" + stop + "',i][public_transport=stop_area];out tags;node(r:stop);rel(bn)[type=route];out tags;"
@@ -114,15 +113,14 @@ function dlLine() {
     $("#overpass_query").val(query);
     $("#overpass_query").show();
 
-    var data  = {
-        "data": query,
-    };
     $("#load_text").html("Loading from Overpass API...");
 
     //Static data to test without straining Overpass servers
     //$.getJSON("./data/lines.json", null, parse);
     
-    $.getJSON(api, data, parse);
+    $.getJSON(  api,
+                {"data": query}, 
+                parse_line);
 }
 
 function init_stop(id) {
@@ -143,11 +141,7 @@ function connections() {
     });
 }
 
-function parse(data) {
-    route_masters = [];
-    lines = [];
-    areas = [];
-    stops = [];
+function parse_line(data) {
     $("#load_text").html("Parsing...");
     data.elements.forEach(function(e) {
         if(e.type == "relation") {
@@ -163,7 +157,6 @@ function parse(data) {
                     if(m.role == "stop" || m.role == "stop_exit_only" || m.role == "stop_entry_only") {
                         r.stops.push(m.ref);
                     }
-
                 });
                 lines[r.id] = r;
                 break;
@@ -182,8 +175,8 @@ function parse(data) {
             stops[e.id].node = e;
         }
     });
-connections();
-render();
+    connections();
+    render();
 }
 
 function parse_connections(data) {
@@ -207,38 +200,37 @@ function render() {
     var line_padding = 300 + stop_radius / 2;
     var max_stops = 0;
 
+    // Todo Allow multiple route masters, perhaps with a <select>
     var route_master = route_masters[0];
 
-    //d3.select("svg").remove();
     $("#content").empty();
 
-    var line;
+    // Count the maximum number of stops in order to set the width of the SVG
     route_master.members.forEach(function(l) {
-        line = lines[l.ref];
-        max_stops = Math.max(max_stops, line.stops.length);
+        max_stops = Math.max(max_stops, lines[l.ref].stops.length);
     });
-    delete line;
 
     var chart = d3.select("#content")
-    .append("svg:svg")
-    .attr("class", "chart")
-    .attr("width", step * max_stops + line_padding/2)
-    .attr("height", line_padding * route_master.members.length + stop_radius + font_size*10)
-    .attr("id", "svg");
+      .append("svg:svg")
+      .attr("class", "chart")
+      //Approximations
+      .attr("width", step * max_stops + line_padding/2)
+      .attr("height", line_padding * route_master.members.length + stop_radius + font_size*10)
+      .attr("id", "svg");
 
-    var i = 0;
-    route_master.members.forEach(function(line_id) {
-        line = lines[line_id.ref];
+
+    for(var i=0; i<route_master.members.length; ++i) {
+        line = lines[route_master.members[i].ref];
         var line_colour = line.tags.colour || "steelblue";
 
         chart.append("line")
-        .attr("x1", 5)
-        .attr("y1", (i+1) * line_padding)
-        .attr("x2", step * line.stops.length + first_padding)
-        .attr("y2", (i+1) * line_padding)
-        .attr("stroke", line_colour)
-        .attr("stroke-width", "6")
-        .attr("stroke-linecap", "round")
+          .attr("x1", 5)
+          .attr("y1", (i+1) * line_padding)
+          .attr("x2", step * line.stops.length + first_padding)
+          .attr("y2", (i+1) * line_padding)
+          .attr("stroke", line_colour)
+          .attr("stroke-width", "6")
+          .attr("stroke-linecap", "round")
 
         chart.append("a")
           .attr("xlink:href", osm_url + 'relation/' + line.id)
@@ -253,7 +245,7 @@ function render() {
             var stop_ref = line.stops[j];
             var stop = stops[stop_ref];
             var area_found = true;
-            var text = "default";
+            var text = false;
             if(stop && stop.area) {
                 text = stop.area.tags.name;
             } else if(stop.node && stop.node.tags.name) {
@@ -266,6 +258,7 @@ function render() {
             else
                 point_url = osm_url + "node/" + stop_ref;
 
+            // Stop node
             chart.append("a")
               .attr("xlink:href", point_url)
               .append("circle")
@@ -275,39 +268,39 @@ function render() {
               .attr("radius", "12")
               .attr("fill", "red");
 
+            // Stop text
             xtext = step * j + first_padding;
             ytext = (i+1) * line_padding - stop_radius;
             chart.append("a")
               .attr("xlink:href", node_url)
               .append("text")
-              .attr("x", xtext)
-              .attr("y", ytext)
-              .attr("fill", ((verbose && !area_found) ? "red" : "black"))
-              .attr("text-anchor", "beginning")
-              .attr("font-size", "16px")
-              .attr("transform", "rotate(" + "-45 " + xtext + " " + ytext + ")")
-              .text(text || "Missing stop_area");
+                .attr("x", xtext)
+                .attr("y", ytext)
+                .attr("fill", ((verbose && !area_found) ? "red" : "black"))
+                .attr("text-anchor", "beginning")
+                .attr("font-size", "16px")
+                .attr("transform", "rotate(" + "-45 " + xtext + " " + ytext + ")")
+                .text(text || "Missing stop_area");
 
-            var k = 1;
+            // Connections
+            if(!stop.area)
+                continue;
             var u = [];
-            if(stop.area)
-                stop.area.connections.forEach(function(c) {
-                    if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
-                        chart.append("a")
-                          .attr("xlink:href", "#r/" + c.tags.network + "+" + c.tags.ref + "+" + (verbose ? "v" : "q"))
-                          .append("text")
-                          .attr("x", xtext)
-                          .attr("y", ytext + 2 * stop_radius + k * font_size)
-                          .attr("text-anchor", "middle")
-                          .attr("font-size", font_size / 2 + "px")
-                          .text(c.tags.ref);
-                        u.push(c.tags.ref);
-                        k++;
-                    }
-                });
+            stop.area.connections.forEach(function(c) {
+                if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
+                    chart.append("a")
+                      .attr("xlink:href", "#r/" + c.tags.network + "+" + c.tags.ref + "+" + (verbose ? "v" : "q"))
+                      .append("text")
+                      .attr("x", xtext)
+                      .attr("y", (i+1) * line_padding + (u.length+1) * font_size)
+                      .attr("text-anchor", "middle")
+                      .attr("font-size", font_size / 2 + "px")
+                      .text(c.tags.ref);
+                    u.push(c.tags.ref);
+                }
+            });
         }
-        i++;
-    });
+    };
     $("#load_text").html(download_svg());
 }
 
