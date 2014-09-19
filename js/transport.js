@@ -143,6 +143,10 @@ function connections() {
 
 function parse_line(data) {
     $("#load_text").html("Parsing...");
+    route_masters = [];
+    lines = [];
+    areas = [];
+    stops = [];
     data.elements.forEach(function(e) {
         if(e.type == "relation") {
             switch(e.tags.type) {
