@@ -12,6 +12,11 @@ var lines = [];
 var areas = [];
 var stops = [];
 
+RegExp.escape = function(text) {
+    // Thanks to http://stackoverflow.com/a/9310752
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
+
 function checkParams() {
     // Listen to request type selection change
     $('#type').change(function() {
@@ -54,8 +59,8 @@ function checkParams() {
 }
 
 function dl() {
-    // Infer from inputs, supposedly valids
-    var api_c   = $('#api_c').val();
+    // Infer from inputs
+    var api_c = $('#api_c').val();
 
     switch(api_c) {
       case "overpass-api.de":
@@ -90,12 +95,10 @@ function dlStop() {
     if (hash != window.location.hash)
         window.location.hash = hash;
 
-    var data  = {
-        "data": query,
-    };
-
     $("#load_text").html("Loading from Overpass API...");
-    $.getJSON(api, data, parse_connections);
+    $.getJSON(api,
+              {"data": query}, 
+              parse_connections);
 }
 
 function dlLine() {
@@ -108,14 +111,22 @@ function dlLine() {
     if (hash != window.location.hash)
         window.location.hash = hash;
 
-    var query = '[out:json];relation["type"="route_master"]["network"~"' + network + '",i]["ref"~"^' + line + '$",i];out;rel(r);out;node(r);out;relation(bn)["type"="public_transport"]["public_transport"="stop_area"];out;foreach(>>;relation(bn)[type=route];out;);';
+    var query = '[out:json];\
+    (\
+    relation["type"="route_master"]["network"~"' + network + '",i]["ref"~"^' + line + '$",i];\
+    rel(r);\
+    node(r);\
+    )->.a;\
+    relation(bn.a)["type"="public_transport"]["public_transport"="stop_area"];\
+    (.a;._;);\
+    out;';
     $("#overpass_query").val(query);
     $("#overpass_query").show();
 
     $("#load_text").html("Loading from Overpass API...");
 
     //Static data to test without straining Overpass servers
-    //$.getJSON("./data/lines.json", null, parse);
+    //$.getJSON("./data/lines.json", null, parse_line);
     
     $.getJSON(  api,
                 {"data": query}, 
@@ -179,7 +190,20 @@ function parse_line(data) {
         }
     });
     connections();
-    render();
+    var re = new RegExp(RegExp.escape(line), "i");
+    $.each(route_masters, function(index, r) {
+        // Only display requested route_masters (no connections)
+        if(!r.tags.ref.toString().match(re))
+            return;
+        $('#select_masters')
+            .append($("<option></option")
+                .attr("value", index)
+                .text(r.tags.name)
+            );
+    });
+    $('#select_masters').removeClass("hidden");
+    $('#render').removeClass("hidden");
+    $("#load_text").empty();
 }
 
 function parse_connections(data) {
@@ -202,7 +226,6 @@ function render() {
     var connection_padding = 5*font_size;
     var line_padding = 300 + stop_radius / 2;
 
-    // Todo Allow multiple route masters, perhaps with a <select>
     var route_master = route_masters[0];
 
     $("#content").empty();
@@ -210,9 +233,7 @@ function render() {
     // Count the maximum number of stops of the searched line
     // in order to set the width of the SVG
     var max_stops = 0;
-    var re = new RegExp(line);
     route_master.members.forEach(function(l) {
-        if(l.ref.toString().match(re))
             max_stops = Math.max(max_stops, lines[l.ref].stops.length);
     });
 

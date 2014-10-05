@@ -29,12 +29,16 @@
         </form>
     </div>
     <div>
-        <span id="load_text"></span><input class="hidden" id="overpass_query" />
+        <span id="load_text"></span>
+        <select class="hidden" id="select_masters" onchange="render()">
+        <input class="hidden"  id="render" type="button" onclick="render()" value="Display"/>
+        <input class="hidden"  id="overpass_query" />
     </div>
     <div id="content">
     </div>
-    <script src="./js/d3.v3.min.js"></script>
-    <script src="./js/jquery.min.js"></script>
-    <script src="./js/transport.js"></script>
+    <script src="js/async.js"></script>
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/transport.js"></script>
 </body>
 </html>
