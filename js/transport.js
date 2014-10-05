@@ -13,7 +13,6 @@ var areas = [];
 var stops = [];
 
 function checkParams() {
-
     // Listen to request type selection change
     $('#type').change(function() {
         type = $('#type').val();
@@ -202,16 +201,19 @@ function render() {
     var first_padding = 20;
     var connection_padding = 5*font_size;
     var line_padding = 300 + stop_radius / 2;
-    var max_stops = 0;
 
     // Todo Allow multiple route masters, perhaps with a <select>
     var route_master = route_masters[0];
 
     $("#content").empty();
 
-    // Count the maximum number of stops in order to set the width of the SVG
+    // Count the maximum number of stops of the searched line
+    // in order to set the width of the SVG
+    var max_stops = 0;
+    var re = new RegExp(line);
     route_master.members.forEach(function(l) {
-        max_stops = Math.max(max_stops, lines[l.ref].stops.length);
+        if(l.ref.toString().match(re))
+            max_stops = Math.max(max_stops, lines[l.ref].stops.length);
     });
 
     var chart = d3.select("#content")
