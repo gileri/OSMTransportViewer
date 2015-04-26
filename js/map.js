@@ -1,6 +1,9 @@
 var opapi = "http://api.openstreetmap.fr/oapi/interpreter";
 var osmUrl = "https://openstreetmap.org/";
 
+var bench_text   = " <bench>";
+var shelter_text = " <shelter>";
+
 var path_color = {
 	bus: 'blue',
 	subway: 'red',
@@ -13,14 +16,6 @@ var stopIcon = L.icon({
     iconUrl: './img/stop.png',
     iconSize: [12, 12],
 });
-
-var nodes = {};
-var ways = {};
-var rels = {};
-var operators = [];
-var networks = [];
-
-var stops_markers = [];
 
 var map = L.map('map').setView([45.75840835755788, 4.895696640014648], 13);
 
@@ -40,134 +35,111 @@ var dlBbox = function() {
 	var opstr = op ? ("[operator='" + op + "']") : "";
 	var refstr = ref ? ("[ref='" + ref + "]'") : "";
 
-	var query = "[timeout:45][out:json];rel[type=route](" + bbox + ")" + netstr + opstr + refstr + ";(._;>;);out;";
-	$.ajax(opapi, {
-		type: "POST",
-		data: query,
-	}).done(parseData);
-	// $.ajax('./data/map.json').done(parseData);
+    query='[out:json];(rel[type=route_master][network=TCL][ref="C2"]; rel(r)->.a; .a; node(r.a)->.b; .b; way(r.a); >>; rel(bn.b)[type=public_transport];); out;',
+
+	//$.ajax(opapi, {
+	//	type: "POST",
+	//	data: query,
+	//}).done(parseData);
+	$.ajax('./data/map.json').done(parseData);
 };
 
-var parseData = function(data) {
-	data.elements.forEach(function(e) {
-		switch(e.type) {
-			case "node":
-				nodes[e.id] = e;
-				break;
-			case "way":
-				ways[e.id] = e;
-				break;
-			case "relation":
-				rels[e.id] = e;
-				if(e.tags.network && networks.indexOf(e.tags.network)==-1) networks.push(e.tags.network);
-				if(e.tags.operator && operators.indexOf(e.tags.operator)==-1) operators.push(e.tags.operator);
-				break;
-		}
-	});
-
-	var netSelect = $("#netSelect");
-	var opSelect = $("#opSelect");
-	$.each(networks, function() {
-	    netSelect.append($("<option />").val(this));
-	});
-	$.each(operators, function() {
-	    opSelect.append($("<option>").val(this));
-	});
-
-	// Join nodes to ways
-	for (w in ways) {
-		ways[w].nodes.forEach(function(m, i) {
-			if(nodes[m]) {
-				ways[w].nodes[i] = nodes[m];
-			}
-		});
-	}
-
-	// Join members of relations recursively
-	for (r in rels) {
-		rels[r].members.forEach(function(m) {
-			switch(m.type){
-				case "node":
-					m.obj = nodes[m.ref];
-					break;
-				case "way":
-					m.obj = ways[m.ref];
-					break;
-				case "relation":
-					m.obj = rels[m.ref];
-					break;
-			}
-		});
-	}
-
-	for (r in rels) {
-		var path = [];
-		rels[r].members.forEach(function(m, mn) {
-			switch(m.role) {
-				case "stop":
-				case "stop_entry_only":
-				case "stop_exit_only":
-					L.marker([m.obj.lat, m.obj.lon], {
-						icon: stopIcon,
-					}).bindPopup(
-						"<a href='" + osmUrl + "node/" + m.ref + "'>" + m.obj.tags.name + "</a>"
-					).addTo(map);
-					break;
-				case "":
-					if(m.type != "way") return;
-
-					// Reverse way display if necessary
-					if(path.length) {
-						var lastNodePath = path[path.length - 1];
-						var firstNodeWay = L.latLng(m.obj.nodes[0].lat, m.obj.nodes[0].lon);
-						var lastNodeWay = L.latLng(m.obj.nodes[m.obj.nodes.length-1].lat, m.obj.nodes[m.obj.nodes.length-1].lon);
-						if(lastNodePath.distanceTo(firstNodeWay) < lastNodePath.distanceTo(lastNodeWay)) {
-							for(var i=0; i < m.obj.nodes.length; ++i) {
-								path.push(L.latLng(m.obj.nodes[i].lat, m.obj.nodes[i].lon));
-							}
-						} else {
-							for(var i=m.obj.nodes.length -1; i >= 0 ; --i) {
-								path.push(L.latLng(m.obj.nodes[i].lat, m.obj.nodes[i].lon));
-							}
-						}
-					} else {
-						// First route segment, try to guess orientation according to the next route segment.
-						var firstNodeFirstWay = m.obj.nodes[m.obj.nodes.length - 1];
-						var lastNodeFirstWay = m.obj.nodes[0];
-						//Find next route segment
-						var j;
-						for(j=mn; j<rels[r].members.length; ++i) {
-							if(rels[r].members[j].role == "" && rels[r].members[j].type == "way") {
-								break;
-							}
-						}
-						var firstNodeSecondWay = rels[r].members[j].obj.nodes[0];
-						
-						var distLast = L.latLng(lastNodeFirstWay.lat, lastNodeFirstWay.lon).distanceTo(L.latLng(firstNodeSecondWay.lat, firstNodeSecondWay.lon));
-						var distFirst = L.latLng(firstNodeFirstWay.lat, firstNodeFirstWay.lon).distanceTo(L.latLng(firstNodeSecondWay.lat, firstNodeSecondWay.lon));
-						
-						if(distLast > distFirst) {
-							for(var i=0; i < m.obj.nodes.length; ++i) {
-								path.push(L.latLng(m.obj.nodes[i].lat, m.obj.nodes[i].lon));
-							}
-						} else {
-							for(var i=m.obj.nodes.length -1; i >= 0 ; --i) {
-								path.push(L.latLng(m.obj.nodes[i].lat, m.obj.nodes[i].lon));
-							}
-						}
-					}
-					break;
-			}
-		});
-		if(path.length > 0) {
-			var color = path_color[rels[r].tags.route];
-
-			var polyline = L.polyline(path, {
-				weight: path_weight,
-				color: color ? color : 'grey'
-			}).bindPopup(
-				"<a href='" + osmUrl + "relation/" + rels[r].id + "'>" + rels[r].tags.name + "</a>"
-			).addTo(map);
-		}
-	}
+var geojsonMarkerOptions = {
+    radius: 8,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
 };
+
+var parseData = function(op_data) {
+    geojson = osmtogeojson(op_data);
+    var parsed = parseOSM(op_data)
+    console.log(parsed);
+    console.log(geojson);
+    L.geoJson(geojson, {
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+    }).addTo(map);
+    _.each(parsed.routes, function(r) {
+        var routeLi = $("<li>");
+        $("<span>")
+            .text(r.tags.name + " ")
+            .data("osmID", r.id)
+            .on("click", function(event) {
+                displayRoute(parsed, parsed.routes[$(this).data("osmID")]);
+            })
+            .appendTo(routeLi);
+        $("<a>", {href: osmUrl + "relation" + "/" + r.id})
+            .text("(ext)")
+            .appendTo(routeLi);
+        $("#routes_list>ul").append(routeLi);
+    });
+};
+
+var displayRoute = function(data, route) {
+    $('#stops_list>table').html("");
+    var stop_li;
+    _.each(route.members, function(member, memberID) {
+        stop_tr = $("<tr>");
+        
+        if(!member.role.match(/stop(_entry_only|_exit_only)?/))
+            return;
+        var stop_name = "<Nom d'arrêt non défini>";
+        if(member.tags.name) {
+            stop_name = member.tags.name;
+        } else if (member.stop_area) {
+            if(member.stop_area.tags.name) {
+                stop_name = member.stop_area.tags.name;
+            }
+        }
+        stop_tr.append($("<td>").append($("<a>", {href: osmUrl + member.type + "/" + member.id}))
+                        .text(stop_name));
+        if(member.stop_area)
+            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
+
+        var potential_platforms = findPlatform(data, route, member.stop_area);
+        if(potential_platforms.length == 1) {
+            var platform = potential_platforms[0];
+            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id}).text(platform.id)));
+            stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
+            stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
+        }
+        $('#stops_list>table').append(stop_tr);
+    });
+}
+
+var findPlatform = function(data, route, stop_area) {
+    var route_platforms = _.where(route.members, {role: 'platform'});
+    var area_platforms = _.where(stop_area.members, {role: 'platform'});
+    return _.intersection(route_platforms, area_platforms);
+}
+
+var displayNode = function(node) {
+
+}
+
+var displayWay = function(way) {
+
+}
+
+var displayFeature = function(map, features) {
+    var l;
+    _.each(features, function(feature, featureID) {
+        switch(feature.type) {
+            case 'node':
+            break;
+            case 'way':
+                var way;
+                _.each(feature.nodes, function(way, wayID) {
+                    // TODO populate PolyLine
+                });
+                L.Polyline(way);
+            break;
+            case 'relation':
+            break;
+        }
+    });
+}

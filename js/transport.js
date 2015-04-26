@@ -55,7 +55,6 @@ function checkParams() {
         // Invalid URL fragment, move along
         console.log(err);
     }
-
 }
 
 function dl() {
@@ -112,21 +111,27 @@ function dlLine() {
         window.location.hash = hash;
 
     var query = '[out:json];\
-    (\
-    relation["type"="route_master"]["network"~"' + network + '",i]["ref"~"^' + line + '$",i];\
+    rel[type=route_master][network~"' + network + '"][ref~"' + line + '"];\
+    out;\
     rel(r);\
-    node(r);\
-    )->.a;\
-    relation(bn.a)["type"="public_transport"]["public_transport"="stop_area"];\
-    (.a;._;);\
+    out;\
+    (\
+      node(r:"stop");\
+      node(r:"stop_entry_only");\
+      node(r:"stop_exit_only");\
+    );\
+    out;\
+    relation(bn)["type"="public_transport"]["public_transport"="stop_area"];\
     out;';
     $("#overpass_query").val(query);
     $("#overpass_query").show();
+    $('#select_masters').addClass("hidden");
+    $('#select_masters').empty();
 
     $("#load_text").html("Loading from Overpass API...");
 
     //Static data to test without straining Overpass servers
-    //$.getJSON("./data/lines.json", null, parse_line);
+    //$.getJSON("./data/metro_B.json", null, parse_line);
     
     $.getJSON(  api,
                 {"data": query}, 
@@ -139,15 +144,38 @@ function init_stop(id) {
     }
 }
 
+function getDistance(lat1,lon1,lat2,lon2) {
+    var R = 6371000; // Radius of the earth in m
+    var dLat = deg2rad(lat2-lat1);
+    var dLon = deg2rad(lon2-lon1);
+    var a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var d = R * c; // Distance in m
+    return d;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI/180)
+}
+
 function connections() {
-    lines.forEach(function (l) {
-        l.stops.forEach(function(m) {
-            if(stops[m] && stops[m].area) {
-             if(!stops[m].area.connections)
-                 stops[m].area.connections = [];
-             stops[m].area.connections.push(l);
-         }
-     });
+    route_masters.forEach(function(rm) {
+        rm.members.forEach(function(l) {
+            lines[l.ref].stops.forEach(function(s) {
+                for(stop in stops) {
+                    var distance = getDistance(stops[s].node.lat,stops[s].node.lon,stops[stop].node.lat,stops[stop].node.lon)
+                    if(distance < 200 && stop != s && stops[s].area != stops[stop].area) {
+                        console.log(distance);
+                        if(!stops[s].area.connections)
+                            stops[s].area.connections = [];
+                        stops[s].area.connections.push(stops[stop])
+                    }
+                }
+           });
+        });
     });
 }
 
@@ -156,40 +184,47 @@ function parse_line(data) {
     route_masters = [];
     lines = [];
     areas = [];
-    stops = [];
+    stops = {};
     data.elements.forEach(function(e) {
         if(e.type == "relation") {
             switch(e.tags.type) {
               case "route_master":
                   route_masters.push(e);
+                  break;
               case "route":
                 r = [];
                 r.tags = e.tags;
                 r.id = e.id;
+                r.members = e.members;
                 r.stops = [];
-                e.members.forEach(function(m) {
-                    if(m.role == "stop" || m.role == "stop_exit_only" || m.role == "stop_entry_only") {
-                        r.stops.push(m.ref);
-                    }
-                });
                 lines[r.id] = r;
                 break;
               case "public_transport":
                 areas[e.id] = e;
-                e.members.forEach( function(n) {
-                    if(n.role == "stop") {
-                        init_stop(n.ref);
-                        stops[n.ref].area = e;
-                    }
-                });
                 break;
             }
-        } else if(e.type == "node") {
+       } else if(e.type == "node") {
             init_stop(e.id);
             stops[e.id].node = e;
         }
     });
-    connections();
+    lines.forEach(function(l) {
+        l.members.forEach(function(m) {
+            if(m.role == "stop" || m.role == "stop_exit_only" || m.role == "stop_entry_only") {
+                l.stops.push(stops[m.ref]);
+            }
+        });
+        delete l.members;
+    });
+    areas.forEach(function(e) {
+        e.members.forEach( function(n) {
+            if(n.role == "stop") {
+                init_stop(n.ref);
+                stops[n.ref.toString()].area = e;
+            }
+        });
+    });
+    //connections();
     var re = new RegExp(RegExp.escape(line), "i");
     $.each(route_masters, function(index, r) {
         // Only display requested route_masters (no connections)
@@ -203,17 +238,6 @@ function parse_line(data) {
     });
     $('#select_masters').removeClass("hidden");
     $('#render').removeClass("hidden");
-    $("#load_text").empty();
-}
-
-function parse_connections(data) {
-    var stop = data.elements[0];
-    $("#content").html("<h2>Stop : " + stop.tags.name + (stop.tags.network ? (", network : " + stop.tags.network) : "" ) + "</h2><span>Available connections :</span>");
-    $("#content").append("<ul id='connections'></ul>");
-    var stops = data.elements.slice(2);
-    stops.forEach(function(e) {
-        $("#connections").append("<li><a href='#r/" + encodeURIComponent(e.tags.network) + '+' + encodeURIComponent(e.tags.ref) + (verbose ? "+v" : "+q") + "'>" + e.tags.name + "</a><a href='" + osm_url + "relation/" + e.id + "'> [OSM]</a></li>");
-    });
     $("#load_text").empty();
 }
 
@@ -273,7 +297,9 @@ function render() {
             var stop = stops[stop_ref];
             var area_found = true;
             var text = false;
-            if(stop && stop.area) {
+            if(!stop)
+                continue;
+            if(stop.area) {
                 text = stop.area.tags.name;
             } else if(stop.node && stop.node.tags.name) {
                 text = stop.node.tags.name;
@@ -310,20 +336,20 @@ function render() {
                 .text(text || "Missing stop_area");
 
             // Connections
-            if(!stop.area)
+            if(!stop.area || !stop.area.connections)
                 continue;
             var u = [];
             stop.area.connections.forEach(function(c) {
-                if(u.length < max_connections_displayed && !(line.tags.ref === c.tags.ref) && u.indexOf(c.tags.ref) == -1) {
+                if(u.length < max_connections_displayed && !(line.tags.ref === c.area.tags.ref) && u.indexOf(c.area.tags.ref) == -1) {
                     chart.append("a")
-                      .attr("xlink:href", "#r/" + c.tags.network + "+" + c.tags.ref + "+" + (verbose ? "v" : "q"))
+                      .attr("xlink:href", "#r/" + c.area.tags.network + "+" + c.area.tags.ref + "+" + (verbose ? "v" : "q"))
                       .append("text")
                       .attr("x", xtext)
                       .attr("y", (i+1) * line_padding + (u.length+1) * font_size)
                       .attr("text-anchor", "middle")
                       .attr("font-size", font_size / 2 + "px")
-                      .text(c.tags.ref);
-                    u.push(c.tags.ref);
+                      .text(c.area.tags.ref);
+                    u.push(c.area.tags.ref);
                 }
             });
         }

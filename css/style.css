@@ -20,6 +20,21 @@ h2 {
 	color: green;
 }
 
-#map {
+div#map {
     height: 640px;
+    width: 49%; /* Try to use 50% */
+    float: left;
+}
+
+div#data_display {
+    width: 40%;
+    float: left;
+}
+
+.featureYes {
+    color: green;
+}
+
+.featureNo {
+    color: red;
 }
