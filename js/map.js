@@ -33,15 +33,19 @@ var dlBbox = function() {
 
 	var netstr = net ? ("[network='" + net + "']") : "";
 	var opstr = op ? ("[operator='" + op + "']") : "";
-	var refstr = ref ? ("[ref='" + ref + "]'") : "";
+	var refstr = ref ? ("[ref='" + ref + "']") : "";
 
-    query='[out:json];(rel[type=route_master][network=TCL][ref="C2"]; rel(r)->.a; .a; node(r.a)->.b; .b; way(r.a); >>; rel(bn.b)[type=public_transport];); out;',
+    // Avoid queries which can match too much routes
+    if(opstr == "" && refstr == "")
+        return;
 
-	//$.ajax(opapi, {
-	//	type: "POST",
-	//	data: query,
-	//}).done(parseData);
-	$.ajax('./data/map.json').done(parseData);
+    query='[out:json];relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;rel(r.route_masters)->.routes;node(r.routes)->.stops;way(r.routes)["highway"]->.paths;node(w.paths)->.paths_nodes;(node(r.routes);way(r.routes);)->.platforms;(relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];)->.stop_areas;(.route_masters;.routes;.stop_areas;.stops;.paths;.platforms;.paths_nodes;);out body;',
+
+	$.ajax(opapi, {
+		type: "POST",
+		data: query,
+	}).done(parseData);
+	//$.ajax('./data/map.json').done(parseData);
 };
 
 var geojsonMarkerOptions = {
@@ -63,6 +67,11 @@ var parseData = function(op_data) {
             return L.circleMarker(latlng, geojsonMarkerOptions);
         }
     }).addTo(map);
+
+    // Clear data display before new data
+    $('#stops_list>table').find("tr:gt(0)").remove();;
+    $("#routes_list ul").empty()
+
     _.each(parsed.routes, function(r) {
         var routeLi = $("<li>");
         $("<span>")
@@ -75,12 +84,12 @@ var parseData = function(op_data) {
         $("<a>", {href: osmUrl + "relation" + "/" + r.id})
             .text("(ext)")
             .appendTo(routeLi);
+
         $("#routes_list>ul").append(routeLi);
     });
 };
 
 var displayRoute = function(data, route) {
-    $('#stops_list>table').find("tr:gt(0)").remove();;
     var stop_li;
     _.each(route.members, function(member, memberID) {
         stop_tr = $("<tr>");
