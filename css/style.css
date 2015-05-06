@@ -1,4 +1,4 @@
-a {
+div#header a {
     text-decoration: none;
     color: green;
 }
@@ -37,4 +37,20 @@ div#data_display {
 
 .featureNo {
     color: red;
+}
+
+li.bus_route, li.trolleybus_route {
+    list-style-image: url('../lib/osmic/bus-stop-14.png');
+}
+
+li.tram_route {
+    list-style-image: url('../lib/osmic/tram-stop-14.png');
+}
+
+li.subway_route {
+    list-style-image: url('../lib/osmic/metro-14.png');
+}
+
+li.railway_route {
+    list-style-image: url('../lib/osmic/railway-station-14.png');
 }

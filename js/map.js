@@ -72,7 +72,7 @@ var parseData = function(op_data) {
     $("#routes_list ul").empty()
 
     _.each(parsed.routes, function(r) {
-        var routeLi = $("<li>");
+        var routeLi = $("<li>").addClass(r.tags.route + "_route");
         $("<span>")
             .text(r.tags.name + " ")
             .data("osmID", r.id)
@@ -81,7 +81,7 @@ var parseData = function(op_data) {
             })
             .appendTo(routeLi);
         $("<a>", {href: osmUrl + "relation" + "/" + r.id})
-            .text("(ext)")
+            .text("(rel ↗)")
             .appendTo(routeLi);
 
         $("#routes_list>ul").append(routeLi);
@@ -106,8 +106,8 @@ var displayRoute = function(data, route) {
             }
         }
         var stopText = stop_name + (member.tags.wheelchair == "yes" ? "♿" : "")
-        stop_tr.append($("<td>").append($("<a>", {href: osmUrl + member.type + "/" + member.id}))
-                        .text(stopText));
+        stop_tr.append($("<td>").append($("<a>", {href: osmUrl + member.type + "/" + member.id})
+                        .text(stopText)));
         if(member.stop_area)
             stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
 
