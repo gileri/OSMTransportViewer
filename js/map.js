@@ -68,8 +68,7 @@ var parseData = function(op_data) {
         }
     }).addTo(map);
 
-    // Clear data display before new data
-    $('#stops_list>table').find("tr:gt(0)").remove();;
+    // Clear data display before new display
     $("#routes_list ul").empty()
 
     _.each(parsed.routes, function(r) {
@@ -90,6 +89,8 @@ var parseData = function(op_data) {
 };
 
 var displayRoute = function(data, route) {
+    // Clear data display before new display
+    $('#stops_list>table').find("tr:gt(0)").remove();;
     var stop_li;
     _.each(route.members, function(member, memberID) {
         stop_tr = $("<tr>");
