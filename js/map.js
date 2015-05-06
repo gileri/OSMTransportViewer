@@ -105,17 +105,22 @@ var displayRoute = function(data, route) {
                 stop_name = member.stop_area.tags.name;
             }
         }
-        var stopText = stop_name + (member.tags.wheelchair == "yes" ? "♿" : "")
-        stop_tr.append($("<td>").append($("<a>", {href: osmUrl + member.type + "/" + member.id})
-                        .text(stopText)));
+        $("<td>")
+            .append($("<a>", {href: osmUrl + member.type + "/" + member.id})
+                .text(stop_name)
+                .append($("<span>").text("♿").addClass("feature_" + member.tags.wheelchair)))
+            .appendTo(stop_tr);
         if(member.stop_area)
             stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
 
         var potential_platforms = findPlatform(data, route, member.stop_area);
         if(potential_platforms.length == 1) {
             var platform = potential_platforms[0];
-            var platformText = platform.id + (platform.tags.wheelchair == "yes" ? "♿" : "")
-            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id}).text(platformText)));
+            //var platformText = platform.id + (platform.tags.wheelchair == "yes" ? "♿" : "")
+            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id})
+                .text(platform.id)
+                .append($("<span>").text("♿").addClass("feature_" + member.tags.wheelchair))
+                ));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
         }

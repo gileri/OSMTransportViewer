@@ -22,21 +22,29 @@ h2 {
 
 div#map {
     height: 640px;
-    width: 49%; /* Try to use 50% */
+    width: 50%;
     float: left;
 }
 
 div#data_display {
-    width: 40%;
+    width: 50%;
     float: left;
 }
 
-.featureYes {
+#stops_list td{
+    font-size: 1.2em;
+}
+
+.feature_yes {
     color: green;
 }
 
-.featureNo {
+.feature_no {
     color: red;
+}
+
+.feature_undefined {
+    color: grey;
 }
 
 li.bus_route, li.trolleybus_route {
