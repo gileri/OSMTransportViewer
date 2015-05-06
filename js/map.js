@@ -80,7 +80,7 @@ var parseData = function(op_data) {
 };
 
 var displayRoute = function(data, route) {
-    $('#stops_list>table').html("");
+    $('#stops_list>table').find("tr:gt(0)").remove();;
     var stop_li;
     _.each(route.members, function(member, memberID) {
         stop_tr = $("<tr>");
@@ -95,15 +95,17 @@ var displayRoute = function(data, route) {
                 stop_name = member.stop_area.tags.name;
             }
         }
+        var stopText = stop_name + (member.tags.wheelchair == "yes" ? "♿" : "")
         stop_tr.append($("<td>").append($("<a>", {href: osmUrl + member.type + "/" + member.id}))
-                        .text(stop_name));
+                        .text(stopText));
         if(member.stop_area)
             stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
 
         var potential_platforms = findPlatform(data, route, member.stop_area);
         if(potential_platforms.length == 1) {
             var platform = potential_platforms[0];
-            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id}).text(platform.id)));
+            var platformText = platform.id + (platform.tags.wheelchair == "yes" ? "♿" : "")
+            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id}).text(platformText)));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
         }
