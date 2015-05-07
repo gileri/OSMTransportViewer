@@ -105,22 +105,29 @@ var displayRoute = function(data, route) {
                 stop_name = member.stop_area.tags.name;
             }
         }
-        $("<td>")
+        stop_td = $("<td>")
             .append($("<a>", {href: osmUrl + member.type + "/" + member.id})
-                .text(stop_name)
-                .append($("<span>").text("♿").addClass("feature_" + member.tags.wheelchair)))
-            .appendTo(stop_tr);
+            .text(stop_name));
+        $("<span>")
+            .text("♿")
+            .addClass("wheelchair feature_" + member.tags.wheelchair)
+            .appendTo(stop_td);
+        stop_tr.append(stop_td)
         if(member.stop_area)
             stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
 
         var potential_platforms = findPlatform(data, route, member.stop_area);
         if(potential_platforms.length == 1) {
             var platform = potential_platforms[0];
-            //var platformText = platform.id + (platform.tags.wheelchair == "yes" ? "♿" : "")
-            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + platform.type + "/" + platform.id})
+            var platform_td = $("<td>");
+            $("<a>", {href: osmUrl + platform.type + "/" + platform.id})
                 .text(platform.id)
-                .append($("<span>").text("♿").addClass("feature_" + member.tags.wheelchair))
-                ));
+                .appendTo(platform_td);
+            $("<span>")
+              .text("♿")
+              .addClass("wheelchair feature_" + member.tags.wheelchair)
+              .appendTo(platform_td);
+            platform_td.appendTo(stop_tr);
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
         }
@@ -129,8 +136,10 @@ var displayRoute = function(data, route) {
 }
 
 var findPlatform = function(data, route, stop_area) {
-    var route_platforms = _.where(route.members, {role: 'platform'});
-    var area_platforms = _.where(stop_area.members, {role: 'platform'});
+	if(stop_area === undefined)
+		return [];
+    var route_platforms = _.filter(route.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
+    var area_platforms = _.filter(stop_area.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
     return _.intersection(route_platforms, area_platforms);
 }
 
