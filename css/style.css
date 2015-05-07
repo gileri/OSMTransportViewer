@@ -68,6 +68,10 @@ div#data_display {
     font-size: 1.6em;
 }
 
+li[class*='_route'] {
+    cursor: pointer;
+}
+
 li.bus_route, li.trolleybus_route {
     list-style-image: url('../lib/osmic/bus-stop-14.png');
 }
