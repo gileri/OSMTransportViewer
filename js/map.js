@@ -90,7 +90,7 @@ var parseData = function(op_data) {
 
 var displayRoute = function(data, route) {
     // Un-hide stop list table header
-    $("tr#stop_list_header").toggleClass("hidden");
+    $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display
     $('#stops_list>table').find("tr:gt(0)").remove();;
     var stop_li;
