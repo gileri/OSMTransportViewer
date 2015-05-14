@@ -66,6 +66,10 @@ div#data_display {
     color: red;
 }
 
+.feature_limited {
+    color: orange;
+}
+
 .feature_undefined {
     color: grey;
 }
