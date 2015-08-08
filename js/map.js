@@ -77,6 +77,8 @@ var parseData = function(op_data) {
             .text(r.tags.name + " ")
             .data("osmID", r.id)
             .on("click", function(event) {
+                $("#routes_list>ul>li>span").removeClass("selected_route");
+                $(this).addClass("selected_route");
                 displayRoute(parsed, parsed.routes[$(this).data("osmID")]);
             })
             .appendTo(routeLi);

@@ -97,3 +97,7 @@ li.subway_route {
 li.railway_route {
     list-style-image: url('../lib/osmic/railway-station-14.png');
 }
+
+.selected_route {
+    font-weight: bold;
+}
