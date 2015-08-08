@@ -31,9 +31,9 @@ var dlBbox = function() {
 	var net = $('#netSelect').val();
 	var ref = $('#refSelect').val();
 
-	var netstr = net ? ("[network='" + net + "']") : "";
-	var opstr = op ? ("[operator='" + op + "']") : "";
-	var refstr = ref ? ("[ref='" + ref + "']") : "";
+	var netstr = net ? ("[network~'" + net + "',i]") : "";
+	var opstr = op ? ("[operator~'" + op + "',i]") : "";
+	var refstr = ref ? ("[ref~'" + ref + "',i]") : "";
 
     // Avoid queries which can match too much routes
     if(opstr == "" && refstr == "")
