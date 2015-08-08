@@ -46,7 +46,7 @@ div#data_display {
     overflow-y: auto;
     height: 100%;
     position: absolute;
-    z-index: 100;
+    z-index: 2000;
     right: 0px;
     background-color: rgba(255, 255, 255, 0.6);
     bottom: 0px;
