@@ -42,7 +42,7 @@ div#map {
 }
 
 div#data_display {
-    width: 50%;
+    width: 10%;
     overflow-y: auto;
     height: 100%;
     position: absolute;
@@ -52,6 +52,12 @@ div#data_display {
     bottom: 0px;
     resize: both;
     overflow-x: auto;
+    transition: width 0.5s;
+}
+
+div#data_display:hover {
+    width:80%;
+    transition: width 0.5s;
 }
 
 #stops_list td a{
