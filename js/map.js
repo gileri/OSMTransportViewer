@@ -26,7 +26,19 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(map);
 
-var dlBbox = function() {
+var route_layer;
+
+function bind_events () {
+    $("#dlForm").on("submit", function (event){
+        dlBbox();   
+        event.preventDefault();
+    });
+    $("#open_close").on("click", function (event) {
+       $("#data_display").toggle();
+    });
+}
+
+function dlBbox () {
 	var bounds = map.getBounds();
 	var bbox = [bounds.getSouth(), bounds.getWest(), bounds.getNorth(), bounds.getEast()].join();
 	var op = $('#opSelect').val();
@@ -43,11 +55,25 @@ var dlBbox = function() {
 
     query='[out:json];relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;rel(r.route_masters)->.routes;node(r.routes)->.stops;way(r.routes)["highway"]->.paths;node(w.paths)->.paths_nodes;(node(r.routes);way(r.routes);)->.platforms;(relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];)->.stop_areas;(.route_masters;.routes;.stop_areas;.stops;.paths;.platforms;.paths_nodes;);out body;',
 
-	$.ajax(opapi, {
-		type: "POST",
-		data: query,
-	}).done(parseData);
-	//$.ajax('./data/map.json').done(parseData);
+    $("#dlForm>input[type=submit]").prop("disabled", true);
+    developement = false;
+    if(developement) {
+        $.ajax('./data/map.json')
+        .done(function (op_data) {
+            parseData(op_data);
+        })
+        .always(function () {
+            $("#dlForm>input[type=submit]").prop("disabled", false);
+        });
+   } else {
+        $.ajax(opapi, {
+            type: "POST",
+            data: query,
+        }).done(function (op_data) {
+            $("#dlForm>input[type=submit]").prop("disabled", false);
+            parseData(op_data);
+        });
+    }
 };
 
 var geojsonMarkerOptions = {
@@ -60,15 +86,31 @@ var geojsonMarkerOptions = {
 };
 
 var parseData = function(op_data) {
-    geojson = osmtogeojson(op_data);
-    var parsed = parseOSM(op_data)
-    console.log(parsed);
-    console.log(geojson);
-    L.geoJson(geojson, {
+    var geojson = osmtogeojson(op_data);
+    var parsed = parseOSM(op_data);
+    if(map.hasLayer(route_layer))
+        map.removeLayer(route_layer);
+    route_layer = L.geoJson(geojson, {
+        filter: function(feature, layer) {
+            return true;
+            if(feature.properties.tags.public_transport == "platform")
+                return true;
+            if(feature.properties.tags.public_transport == "stop_position")
+                return true;
+            return false;
+        },
+        style: function(feature) {
+            console.log(feature);
+        },
         pointToLayer: function(feature, latlng) {
+            if(feature.properties.tags.public_transport == "platform")
+                return L.circleMarker(latlng, geojsonMarkerOptions);
+            if(feature.properties.tags.public_transport == "stop_position")
+                return L.circleMarker(latlng, geojsonMarkerOptions);
             return L.circleMarker(latlng, geojsonMarkerOptions);
         }
-    }).addTo(map);
+    });
+    route_layer.addTo(map);
 
     // Clear data display before new display
     $("#routes_list ul").empty()
@@ -175,3 +217,5 @@ var displayFeature = function(map, features) {
         }
     });
 }
+
+bind_events();

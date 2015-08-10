@@ -13,25 +13,22 @@
             <a href="http://www.openstreetmap.org"><small>Transport data © OpenStreetMap contributors</small></a>
         </div>
         <div id="main_toolbar">
-            <span id="load_text"></span><input class="hidden" id="overpass_query" />
+            <form id="dlForm">
+                <span id="load_text"></span><input class="hidden" id="overpass_query" />
+                
+                <label>Network</label>
+                <input id="netSelect" name="network" type="text" autofocus="autofocus" />
 
-            <label>Network</label>
-            <input id="netSelect" type="text" list="netList" autofocus="autofocus"/>
-            <datalist id="netList">
-            </datalist>
+                <label>Operator</label>
+                <input id="opSelect" name="operator" type="text" />
 
-            <label>Operator</label>
-            <input id="opSelect" type="text" list="opList" />
-            <datalist id="opList">
-            </datalist>
-
-            <label>Ref</label>
-            <input id="refSelect" type="text" list="refList" />
-            <datalist id="refList">
-            </datalist>
-            <button onclick="javascript:dlBbox()">Download</button>
+                <label>Ref</label>
+                <input id="refSelect" name="ref" type="text" />
+                <input type="submit" />
+            </form>
         </div>
         <div id="content">
+            <button id="open_close">Routes</button>
             <div id="map"></div>
             <div id="data_display">
                 <div id="routes_list">

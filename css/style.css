@@ -42,7 +42,7 @@ div#map {
 }
 
 div#data_display {
-    width: 10%;
+    width: 50%;
     overflow-y: auto;
     height: 100%;
     position: absolute;
@@ -52,12 +52,6 @@ div#data_display {
     bottom: 0px;
     resize: both;
     overflow-x: auto;
-    transition: width 0.5s;
-}
-
-div#data_display:hover {
-    width:80%;
-    transition: width 0.5s;
 }
 
 #stops_list td a{
@@ -107,3 +101,9 @@ li.railway_route {
 .selected_route {
     font-weight: bold;
 }
+
+#open_close {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 3000;
