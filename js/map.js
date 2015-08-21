@@ -162,7 +162,7 @@ var displayRoute = function(data, route) {
             .appendTo(stop_td);
         stop_tr.append(stop_td)
         if(member.stop_area)
-            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.id)));
+            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.tags.name || member.stop_area.id)));
 
         var potential_platforms = findPlatform(data, route, member.stop_area);
         if(potential_platforms.length == 1) {
