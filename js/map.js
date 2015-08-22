@@ -26,11 +26,11 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(map);
 
-var route_layer;
+var routeLayer;
 
 function bind_events () {
     $("#dlForm").on("submit", function (event){
-        dlBbox();   
+        dlBbox();
         event.preventDefault();
     });
     $("#open_close").on("click", function (event) {
@@ -60,7 +60,7 @@ function dlBbox () {
     if(developement) {
         $.ajax('./data/map.json')
         .done(function (op_data) {
-            parseData(op_data);
+            parseAndDisplay(op_data);
         })
         .always(function () {
             $("#dlForm>input[type=submit]").prop("disabled", false);
@@ -71,7 +71,7 @@ function dlBbox () {
             data: query,
         }).done(function (op_data) {
             $("#dlForm>input[type=submit]").prop("disabled", false);
-            parseData(op_data);
+            parseAndDisplay(op_data);
         });
     }
 };
@@ -85,32 +85,40 @@ var geojsonMarkerOptions = {
     fillOpacity: 0.8
 };
 
-var parseData = function(op_data) {
-    var geojson = osmtogeojson(op_data);
-    var parsed = parseOSM(op_data);
-    if(map.hasLayer(route_layer))
-        map.removeLayer(route_layer);
-    route_layer = L.geoJson(geojson, {
-        filter: function(feature, layer) {
-            return true;
-            if(feature.properties.tags.public_transport == "platform")
-                return true;
-            if(feature.properties.tags.public_transport == "stop_position")
-                return true;
-            return false;
-        },
-        style: function(feature) {
-            console.log(feature);
-        },
-        pointToLayer: function(feature, latlng) {
-            if(feature.properties.tags.public_transport == "platform")
-                return L.circleMarker(latlng, geojsonMarkerOptions);
-            if(feature.properties.tags.public_transport == "stop_position")
-                return L.circleMarker(latlng, geojsonMarkerOptions);
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
+function displayOnMap(parsedData) {
+    if(map.hasLayer(routeLayer))
+        map.removeLayer(routeLayer);
+    routeLayer = L.layerGroup();
+
+    _.each(parsedData.stop_positions, function(obj, index, parsedData) {
+        prepareMarker(obj, parsedData, routeLayer);
     });
-    route_layer.addTo(map);
+    _.each(parsedData.platforms, function(obj, index, parsedData) {
+        prepareMarker(obj, parsedData, routeLayer);
+    });
+    routeLayer.addTo(map);
+}
+
+function getTagTable(obj) {
+    var tagStr = "<table>";
+    Object.keys(obj.tags).forEach(function(key) {
+        tagStr += `<tr><td>${key}</td><td>${obj.tags[key]}</td></tr>`;
+    });
+    tagStr += "</table>";
+    return tagStr;
+}
+
+function prepareMarker(obj, parsedData, group) {
+    var popupHTML = `<h1>${obj.tags.name || "Missing name"}</h1>${getTagTable(obj)}`
+    if(obj.type == "way") return;
+    obj.marker = L.marker([obj.lat, obj.lon])
+                .bindPopup(popupHTML);
+    group.addLayer(obj.marker);
+}
+
+function parseAndDisplay(op_data) {
+    var parsed = parseOSM(op_data);
+    displayOnMap(parsed);
 
     // Clear data display before new display
     $("#routes_list ul").empty()
@@ -138,24 +146,24 @@ var displayRoute = function(data, route) {
     // Un-hide stop list table header
     $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display
-    $('#stops_list>table').find("tr:gt(0)").remove();;
+    $('#stops_list>table').find("tr:gt(0)").remove();
     var stop_li;
     _.each(route.members, function(member, memberID) {
         stop_tr = $("<tr>");
         
         if(!member.role.match(/stop(_entry_only|_exit_only)?/))
             return;
-        var stop_name = "<Nom d'arrêt non défini>";
-        if(member.tags.name) {
-            stop_name = member.tags.name;
-        } else if (member.stop_area) {
-            if(member.stop_area.tags.name) {
-                stop_name = member.stop_area.tags.name;
-            }
-        }
         stop_td = $("<td>")
-            .append($("<a>", {href: osmUrl + member.type + "/" + member.id})
-            .text(stop_name));
+            .append($("<a>", {href: osmUrl + member.type + "/" + member.id,
+                              "data-osm": member.id})
+            .on("mouseenter", null, member, function(e) {
+                member.marker.openPopup();
+            })
+            .on("mouseleave", null, member, function(e) {
+                member.marker.closePopup();
+            })
+            .text(member.tags.name || "Missing name")
+            );
         $("<span>")
             .text("♿")
             .addClass("wheelchair feature_" + member.tags.wheelchair)
@@ -175,7 +183,13 @@ var displayRoute = function(data, route) {
               .text("♿")
               .addClass("wheelchair feature_" + member.tags.wheelchair)
               .appendTo(platform_td);
-            platform_td.appendTo(stop_tr);
+            platform_td.on("mouseenter", null, member, function(e) {
+                member.marker.openPopup();
+            })
+            .on("mouseleave", null, member, function(e) {
+                member.marker.closePopup();
+            })
+            .appendTo(stop_tr);
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
         }
@@ -189,33 +203,6 @@ var findPlatform = function(data, route, stop_area) {
     var route_platforms = _.filter(route.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
     var area_platforms = _.filter(stop_area.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
     return _.intersection(route_platforms, area_platforms);
-}
-
-var displayNode = function(node) {
-
-}
-
-var displayWay = function(way) {
-
-}
-
-var displayFeature = function(map, features) {
-    var l;
-    _.each(features, function(feature, featureID) {
-        switch(feature.type) {
-            case 'node':
-            break;
-            case 'way':
-                var way;
-                _.each(feature.nodes, function(way, wayID) {
-                    // TODO populate PolyLine
-                });
-                L.Polyline(way);
-            break;
-            case 'relation':
-            break;
-        }
-    });
 }
 
 bind_events();
