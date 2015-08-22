@@ -19,10 +19,10 @@ var stopIcon = L.icon({
 
 var map = L.map('map', {attributionControl: false})
                .setView([45.75840835755788, 4.895696640014648], 13);
-L.control.attribution({position: "bottomleft"}).addAttribution("© OpenStreetMap contributors").addTo(map);
+L.control.attribution({position: "bottomleft"}).addAttribution('Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors').addTo(map);
 
 L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+    attribution: ', <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 18
 }).addTo(map);
 
