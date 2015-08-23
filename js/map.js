@@ -133,11 +133,18 @@ function getTagTable(obj) {
 }
 
 function prepareMarker(obj, parsedData, group) {
-    var popupHTML = `<h1>${obj.tags.name || "Missing name"}</h1>${getTagTable(obj)}`
-    if(obj.type == "way") return;
-    obj.marker = L.marker([obj.lat, obj.lon])
+    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
+    if(obj.type == "way") {
+        var latlngs = [];
+        _.each(obj.nodes, function(n) {
+            latlngs.push(L.latLng(n.lat, n.lon));
+        });
+        obj.layer = L.polyline(latlngs,{color: 'red'});
+    } else {
+    obj.layer = L.marker([obj.lat, obj.lon])
                 .bindPopup(popupHTML);
-    group.addLayer(obj.marker);
+    }
+    group.addLayer(obj.layer);
 }
 
 function parseAndDisplay(op_data) {
@@ -181,10 +188,10 @@ var displayRoute = function(data, route) {
             .append($("<a>", {href: osmUrl + member.type + "/" + member.id,
                               "data-osm": member.id})
             .on("mouseenter", null, member, function(e) {
-                member.marker.openPopup();
+                member.layer.openPopup();
             })
             .on("mouseleave", null, member, function(e) {
-                member.marker.closePopup();
+                member.layer.closePopup();
             })
             .text(member.tags.name || "Missing name")
             );
@@ -208,10 +215,10 @@ var displayRoute = function(data, route) {
               .addClass("wheelchair feature_" + member.tags.wheelchair)
               .appendTo(platform_td);
             platform_td.on("mouseenter", null, member, function(e) {
-                member.marker.openPopup();
+                member.layer.openPopup();
             })
             .on("mouseleave", null, member, function(e) {
-                member.marker.closePopup();
+                member.layer.closePopup();
             })
             .appendTo(stop_tr);
             stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
