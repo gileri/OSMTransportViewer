@@ -47,13 +47,37 @@ function dlBbox () {
 
 	var netstr = net ? ("[network~'" + net + "',i]") : "";
 	var opstr = op ? ("[operator~'" + op + "',i]") : "";
-	var refstr = ref ? ("[ref~'" + ref + "',i]") : "";
+	var refstr = ref ? ("[ref~'^" + ref + "$',i]") : "";
 
     // Avoid queries which can match too much routes
     if(opstr == "" && refstr == "")
         return;
 
-    query='[out:json];relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;rel(r.route_masters)->.routes;node(r.routes)->.stops;way(r.routes)["highway"]->.paths;node(w.paths)->.paths_nodes;(node(r.routes);way(r.routes);)->.platforms;(relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];)->.stop_areas;(.route_masters;.routes;.stop_areas;.stops;.paths;.platforms;.paths_nodes;);out body;',
+    query='[out:json];' +
+    'relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;' +
+    'rel(r.route_masters)->.routes;' +
+    'node(r.routes)->.stops;' +
+    'way(r.routes)["highway"]->.paths;' +
+    'node(w.paths)->.paths_nodes;' +
+    '(' +
+    '  node(r.routes:"platform");' +
+    '  way (r.routes:"platform");' +
+    ');' +
+    '(._;>;)->.platforms;' +
+    '(' +
+    '  relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
+    '  relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
+    ')->.stop_areas;' +
+    '(' +
+    '  .route_masters;' +
+    '  .routes;' +
+    '  .stop_areas;' +
+    '  .stops;' +
+    '  .paths;' +
+    '  .platforms;' +
+    '  .paths_nodes;' +
+    ');' +
+    'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
     developement = false;
