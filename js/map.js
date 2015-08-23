@@ -109,15 +109,15 @@ var geojsonMarkerOptions = {
     fillOpacity: 0.8
 };
 
-function displayOnMap(parsedData) {
+function displayOnMap(parsedData, route) {
     if(map.hasLayer(routeLayer))
         map.removeLayer(routeLayer);
     routeLayer = L.layerGroup();
 
-    _.each(parsedData.stop_positions, function(obj, index, parsedData) {
+    _.each(route.stop_positions, function(obj, index, parsedData) {
         prepareMarker(obj, parsedData, routeLayer);
     });
-    _.each(parsedData.platforms, function(obj, index, parsedData) {
+    _.each(route.platforms, function(obj, index, parsedData) {
         prepareMarker(obj, parsedData, routeLayer);
     });
     routeLayer.addTo(map);
@@ -139,7 +139,11 @@ function prepareMarker(obj, parsedData, group) {
         _.each(obj.nodes, function(n) {
             latlngs.push(L.latLng(n.lat, n.lon));
         });
-        obj.layer = L.polyline(latlngs,{color: 'red'});
+        obj.layer = L.polyline(latlngs,{
+            color: 'red',
+            weight: 12
+        })
+        .bindPopup(popupHTML);;
     } else {
     obj.layer = L.marker([obj.lat, obj.lon])
                 .bindPopup(popupHTML);
@@ -149,7 +153,6 @@ function prepareMarker(obj, parsedData, group) {
 
 function parseAndDisplay(op_data) {
     var parsed = parseOSM(op_data);
-    displayOnMap(parsed);
 
     // Clear data display before new display
     $("#routes_list ul").empty()
@@ -174,6 +177,7 @@ function parseAndDisplay(op_data) {
 };
 
 var displayRoute = function(data, route) {
+    displayOnMap(data, route)
     // Un-hide stop list table header
     $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display

@@ -73,6 +73,22 @@ var parseOSM = function (data) {
         }
         else if (haveTag(r, 'type', 'route')) {
             routes[r.id] = r;
+            r.stop_positions = [];
+            r.platforms = [];
+            r.paths = [];
+            _.each(r.members, function(m) {
+                switch(m.role) {
+                    case "stop":
+                        r.stop_positions.push(m);
+                    break;
+                    case "platform":
+                        r.platforms.push(m);
+                    break;
+                    case "":
+                        r.paths.push(m);
+                    break;
+                }
+            });
         }
         else if (haveTag(r, 'type', 'route_master')) {
             route_masters[r.id] = r;
@@ -93,12 +109,12 @@ var parseOSM = function (data) {
 
     return {
         'nodes': nodes,
-            'ways': ways,
-            'rels': rels,
-            'stop_positions': stop_positions,
-            'platforms': platforms,
-            'stop_areas': stop_areas,
-            'routes': routes,
-            'route_masters': route_masters
+        'ways': ways,
+        'rels': rels,
+        'stop_positions': stop_positions,
+        'platforms': platforms,
+        'stop_areas': stop_areas,
+        'routes': routes,
+        'route_masters': route_masters
     }
 }
