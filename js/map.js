@@ -193,7 +193,7 @@ var displayRoute = function(data, route) {
             .on("mouseleave", null, member, function(e) {
                 member.layer.closePopup();
             })
-            .text(member.tags.name || "Missing name")
+            .text(member.tags.name || "!Missing name!")
             );
         $("<span>")
             .text("♿")
