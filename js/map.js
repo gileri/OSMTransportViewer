@@ -120,6 +120,9 @@ function displayOnMap(parsedData, route) {
     _.each(route.platforms, function(obj, index, parsedData) {
         prepareMarker(obj, parsedData, routeLayer);
     });
+    _.each(route.paths, function(obj, index, parsedData) {
+        preparePath(obj, parsedData, routeLayer);
+    });
     routeLayer.addTo(map);
 }
 
@@ -132,13 +135,18 @@ function getTagTable(obj) {
     return tagStr;
 }
 
-function prepareMarker(obj, parsedData, group) {
-    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
-    if(obj.type == "way") {
+function getLatLngArray(obj) {
         var latlngs = [];
         _.each(obj.nodes, function(n) {
             latlngs.push(L.latLng(n.lat, n.lon));
         });
+        return latlngs;
+}
+
+function prepareMarker(obj, parsedData, group) {
+    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
+    if(obj.type == "way") {
+        latlngs = getLatLngArray(obj);
         obj.layer = L.polyline(latlngs,{
             color: 'red',
             weight: 12
@@ -149,6 +157,15 @@ function prepareMarker(obj, parsedData, group) {
                 .bindPopup(popupHTML);
     }
     group.addLayer(obj.layer);
+}
+
+function preparePath(obj, parsedData, group) {
+    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
+    var latlngs = getLatLngArray(obj);
+    group.addLayer(L.polyline(latlngs, {
+        color: 'green'
+    })
+    .bindPopup(popupHTML));
 }
 
 function parseAndDisplay(op_data) {
