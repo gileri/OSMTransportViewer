@@ -28,17 +28,24 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var routeLayer;
 
+function getURLParameter(name) {
+    // From http://stackoverflow.com/a/11582513/1032870
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+}
+
 function bind_events () {
-    $("#dlForm").on("submit", function (event){
-        dlBbox();
-        event.preventDefault();
-    });
+    // To be executed on page load
+
     $("#open_close").on("click", function (event) {
        $("#data_display").toggle();
     });
+	$('#opSelect' ).val(getURLParameter("operator"));
+	$('#netSelect').val(getURLParameter("network"));
+	$('#refSelect').val(getURLParameter("ref"));
+    dlData();
 }
 
-function dlBbox () {
+function dlData() {
 	var bounds = map.getBounds();
 	var bbox = [bounds.getSouth(), bounds.getWest(), bounds.getNorth(), bounds.getEast()].join();
 	var op = $('#opSelect').val();
