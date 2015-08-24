@@ -18,18 +18,18 @@ var parseOSM = function (data) {
     var routes = {}
     var route_masters = {}
     data.elements.forEach(function(e) {
-            switch(e.type) {
-            case "node":
-            nodes[e.id] = e;
-            break;
-            case "way":
-            ways[e.id] = e;
-            break;
-            case "relation":
-            rels[e.id] = e;
-            break;
-            }
-            });
+       switch(e.type) {
+           case "node":
+           nodes[e.id] = e;
+       break;
+       case "way":
+           ways[e.id] = e;
+       break;
+       case "relation":
+           rels[e.id] = e;
+       break;
+       }
+    });
 
     _.each(ways, function(w) {
         newMembers = [];
@@ -46,7 +46,7 @@ var parseOSM = function (data) {
         newMembers = [];
         _.each(r.members, function(m) {
             var newMember;
-            switch(m.type) {
+           switch(m.type) {
                 case "node":
                     newMember = nodes[m.ref];
                 break;
@@ -97,7 +97,7 @@ var parseOSM = function (data) {
 
     for (var n in nodes) {
         if (!nodes.hasOwnProperty(n)) {
-            continue
+            continue;
         }
         if(haveTag(nodes[n], 'public_transport', 'stop_position')) {
             stop_positions[nodes[n].id] = nodes[n];
