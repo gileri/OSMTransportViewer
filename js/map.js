@@ -87,34 +87,18 @@ function dlData() {
     'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
-    developement = false;
-    if(developement) {
-        $.ajax('./data/map.json')
-        .done(function (op_data) {
-            parseAndDisplay(op_data);
-        })
-        .always(function () {
-            $("#dlForm>input[type=submit]").prop("disabled", false);
-        });
-   } else {
-        $.ajax(opapi, {
-            type: "POST",
-            data: query,
-        }).done(function (op_data) {
-            $("#dlForm>input[type=submit]").prop("disabled", false);
-            parseAndDisplay(op_data);
-        });
-    }
-};
-
-var geojsonMarkerOptions = {
-    radius: 8,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-};
+    $("#dlForm").append($("<span>").html("Loading...").attr("id", "loadingtext"));
+    $.ajax(opapi, {
+        type: "POST",
+        data: query,
+    }).done(function (op_data) {
+        parseAndDisplay(op_data);
+    })
+    .always(function () {
+        $("#dlForm>input[type=submit]").prop("disabled", false);
+        $("#loadingtext").remove();
+    });
+}
 
 function displayOnMap(parsedData, route) {
     if(map.hasLayer(routeLayer))
