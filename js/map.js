@@ -1,3 +1,4 @@
+//var opapi = "http://overpass-api.de/api/interpreter";
 var opapi = "http://api.openstreetmap.fr/oapi/interpreter";
 var osmUrl = "https://openstreetmap.org/";
 
@@ -191,7 +192,7 @@ var displayRoute = function(data, route) {
     // Clear data display before new display
     $('#stops_list>table').find("tr:gt(0)").remove();
     var stop_li;
-    _.each(route.members, function(member, memberID) {
+    _.each(route.members, function(member) {
         stop_tr = $("<tr>");
         
         if(!member.role.match(/stop(_entry_only|_exit_only)?/))
@@ -215,33 +216,47 @@ var displayRoute = function(data, route) {
         if(member.stop_area)
             stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.tags.name || member.stop_area.id)));
 
-        var potential_platforms = findPlatform(data, route, member.stop_area);
-        if(potential_platforms.length == 1) {
-            var platform = potential_platforms[0];
-            var platform_td = $("<td>");
+        var platforms = findPlatform(data, route, member.stop_area);
+        var platform_ul = $("<ul>");
+        _.each(platforms, function(platform) {
+            var platform_li = $("<li>");
             $("<a>", {href: osmUrl + platform.type + "/" + platform.id})
-                .text(platform.id)
-                .appendTo(platform_td);
+            .text(platform.id) //TODO display name OR id
+            .appendTo(platform_li);
             $("<span>")
-              .text("♿")
-              .addClass("wheelchair feature_" + member.tags.wheelchair)
-              .appendTo(platform_td);
-            platform_td.on("mouseenter", null, member, function(e) {
-                member.layer.openPopup();
+            .text("♿")
+            .addClass("wheelchair feature_" + member.tags.wheelchair)
+            .appendTo(platform_li);
+
+            platform_li.on("mouseenter", null, member, function(e) {
+                platform.layer.openPopup();
             })
-            .on("mouseleave", null, member, function(e) {
-                member.layer.closePopup();
+            .on("mouseleave", null, platform, function(e) {
+                platform.layer.closePopup();
             })
-            .appendTo(stop_tr);
-            stop_tr.append($("<td>").append($("<span>").text(platform.tags.shelter)));
-            stop_tr.append($("<td>").append($("<span>").text(platform.tags.bench)));
-        }
+            .appendTo(platform_ul);
+        });
+        var shelter_ul = $("<ul>");
+        _.each(platforms, function(platform) {
+            $("<li>")
+            .text(platform.tags.shelter)
+            .appendTo(shelter_ul);
+        });
+        var bench_ul = $("<ul>");
+        _.each(platforms, function(platform) {
+            $("<li>")
+            .text(platform.tags.bench)
+            .appendTo(bench_ul);
+        });
+        $("<td>").append(platform_ul).appendTo(stop_tr);
+        $("<td>").append(shelter_ul).appendTo(stop_tr);
+        $("<td>").append(bench_ul).appendTo(stop_tr);
         $('#stops_list>table').append(stop_tr);
     });
 }
 
-var findPlatform = function(data, route, stop_area) {
-	if(stop_area === undefined)
+function findPlatform(data, route, stop_area) {
+	if(!stop_area)
 		return [];
     var route_platforms = _.filter(route.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
     var area_platforms = _.filter(stop_area.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});

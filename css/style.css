@@ -107,3 +107,13 @@ li.railway_route {
     top: 0px;
     right: 0px;
     z-index: 3000;
+}
+
+#stops_list ul {
+    margin: 0px;
+    list-style-type: none;
+}
+
+#stops_list td {
+    /*vertical-align: top;*/
+}
