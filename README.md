@@ -7,7 +7,7 @@ Parses the "new" [schema](https://wiki.openstreetmap.org/wiki/Proposed_features/
 
 # How to use #
 
-Open index.html (a working version is hosted by [Github](https://gileri.github.io/OSMTransportViewer/)),
+Open index.html (a working version is hosted by [Github Pages](https://gileri.github.io/OSMTransportViewer/)),
 enter your public transport network name, the reference of the route and you're good !
 
 The verbose parameter try to highlight stops with errors.
@@ -15,7 +15,7 @@ You can change the Overpass API server to whichever you want (some don't have a 
 
 After displaying a route, you can share it with others directly by copying the page's URL, as it updates as soon as you request a new plan.
 
-Have *fun* with Public Transport ! (/s)
+Have *fun* with Public Transport !
 
 # Credits #
 
