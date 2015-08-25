@@ -43,7 +43,6 @@ div#map {
 
 div#data_display {
     width: 50%;
-    overflow-y: auto;
     height: 100%;
     position: absolute;
     z-index: 2000;
@@ -51,7 +50,12 @@ div#data_display {
     background-color: rgba(255, 255, 255, 0.6);
     bottom: 0px;
     resize: both;
-    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+div#stops_list {
+    overflow-y: auto;
 }
 
 #stops_list td a{
