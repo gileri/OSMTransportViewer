@@ -1,6 +1,5 @@
-//var opapi = "http://overpass-api.de/api/interpreter";
-var opapi = "http://api.openstreetmap.fr/oapi/interpreter";
-var osmUrl = "https://openstreetmap.org/";
+var opapi = "//overpass-api.de/api/interpreter";
+var osmUrl = "//openstreetmap.org/";
 
 var bench_text   = " <bench>";
 var shelter_text = " <shelter>";
@@ -22,8 +21,8 @@ var map = L.map('map', {attributionControl: false})
                .setView([45.75840835755788, 4.895696640014648], 13);
 L.control.attribution({position: "bottomleft"}).addAttribution('Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors').addTo(map);
 
-L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: ', <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: ', <a href="//creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 18
 }).addTo(map);
 
