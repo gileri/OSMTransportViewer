@@ -18,7 +18,8 @@ Have *fun* with Public Transport !
 
 # Examples #
 
-[TCL C1 in Lyon](http://gileri.github.io/OSMTransportViewer/?network=TCL&operator=&ref=C1)
+[TCL C1 in Lyon, France](http://gileri.github.io/OSMTransportViewer/?network=TCL&operator=&ref=C1)
+[TAG A in Grenoble, France](http://localhost:8000/?network=&operator=TAG&ref=A)
 
 # Credits #
 
