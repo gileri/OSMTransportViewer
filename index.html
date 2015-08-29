@@ -4,33 +4,48 @@
     <title>OSM Public Transport Map</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="lib/sidebar-v2/leaflet-sidebar.min.css" />
 </head>
 <body>
-    <div id="page">
-        <a href="https://github.com/gileri/OSMTransportViewer"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
-        <div id="header">
-            <a href="https://github.com/gileri/OSMTransportViewer/blob/gh-pages/README.md"><h1>OSM Public Transport Viewer</h1></a>
-            <a href="http://www.openstreetmap.org"><small>Transport data © OpenStreetMap contributors</small></a>
-        </div>
-        <div id="main_toolbar">
-            <form id="dlForm">
-                <span id="load_text"></span><input class="hidden" id="overpass_query" />
-                
-                <label>Network</label>
-                <input id="netSelect" name="network" type="text" autofocus="autofocus" />
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#query" role="tab"><i class="fa fa-search"></i></a></li>
+                <li id="data_tab" class="disabled"><a href="#data_display" role="tab"><i class="fa fa-bars"></i></a></li>
+            </ul>
 
-                <label>Operator</label>
-                <input id="opSelect" name="operator" type="text" />
-
-                <label>Ref</label>
-                <input id="refSelect" name="ref" type="text" />
-                <input type="submit" />
-            </form>
+            <ul role="tablist">
+                <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+            </ul>
         </div>
-        <div id="content">
-            <button id="open_close">Routes</button>
-            <div id="map"></div>
-            <div id="data_display">
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="query">
+                <h1 class="sidebar-header">
+                    Query
+                    <div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
+                </h1>
+                <form id="dlForm">
+                    <span id="load_text"></span><input class="hidden" id="overpass_query" />
+                    
+                    <label>Network</label>
+                    <input id="netSelect" name="network" type="text" autofocus="autofocus" /><br />
+
+                    <label>Operator</label>
+                    <input id="opSelect" name="operator" type="text" /><br />
+
+                    <label>Ref</label>
+                    <input id="refSelect" name="ref" type="text" /><br />
+                    <input type="submit" />
+                </form>
+
+            </div>
+
+            <div class="sidebar-pane" id="data_display">
+                <h1 class="sidebar-header">Data<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
                 <div id="routes_list">
                     <ul>
                     </ul>
@@ -47,10 +62,20 @@
                     </table>
                 </div>
             </div>
+
+            <div class="sidebar-pane" id="messages">
+                <h1 class="sidebar-header">Messages<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+            </div>
+
+            <div class="sidebar-pane" id="settings">
+                <h1 class="sidebar-header">Settings<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+            </div>
         </div>
     </div>
+    <div id="map"></div>
     <script src="lib/jQuery/jquery.min.js"></script>
     <script src="lib/leaflet/leaflet.js"></script>
+    <script src="lib/sidebar-v2/leaflet-sidebar.min.js"></script>
     <script src="lib/underscorejs/underscore-min.js"></script>
     <script src="js/parseOSM.js"></script>
     <script src="js/map.js"></script>

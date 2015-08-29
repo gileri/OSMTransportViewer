@@ -17,15 +17,14 @@ var stopIcon = L.icon({
     iconSize: [12, 12],
 });
 
-var map = L.map('map', {attributionControl: false})
+var map = L.map('map')
                .setView([45.75840835755788, 4.895696640014648], 13);
-L.control.attribution({position: "bottomleft"}).addAttribution('Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors').addTo(map);
 
 L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: ', <a href="//creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+    attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18
 }).addTo(map);
-
+var sidebar = L.control.sidebar('sidebar').addTo(map);
 var routeLayer;
 
 function getURLParameter(name) {
@@ -36,9 +35,6 @@ function getURLParameter(name) {
 function bind_events () {
     // To be executed on page load
 
-    $("#open_close").on("click", function (event) {
-       $("#data_display").toggle();
-    });
 	$('#opSelect' ).val(getURLParameter("operator"));
 	$('#netSelect').val(getURLParameter("network"));
 	$('#refSelect').val(getURLParameter("ref"));
@@ -57,8 +53,13 @@ function dlData() {
 	var refstr = ref ? ("[ref~'^" + ref + "$',i]") : "";
 
     // Avoid queries which can match too much routes
-    if(opstr == "" && refstr == "")
+    if(opstr == "" && refstr == "") {
+        sidebar.open("query");
         return;
+    }
+    $("li#data_tab").removeClass("disabled");
+    $("li#data_tab i").removeClass("fa-bars").addClass("fa-spinner fa-spin");
+    sidebar.open("data_display");
 
     query='[out:json];' +
     'relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;' +
@@ -93,10 +94,13 @@ function dlData() {
         data: query,
     }).done(function (op_data) {
         parseAndDisplay(op_data);
-    })
-    .always(function () {
+        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
+    }).fail(function (op_data) {
+        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
+    }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
         $("#loadingtext").remove();
+        $("li#data_tab i").removeClass().addClass("fa fa-bars");
     });
 }
 

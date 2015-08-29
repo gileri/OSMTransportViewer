@@ -1,28 +1,15 @@
-div#header a {
-    text-decoration: none;
-    color: green;
-}
-
 html, body {
     padding: 0px;
     margin: 0px;
     height: 100%;
 }
 
-div#page {
-    height: 100%;
+table {
+    border-collapse: collapse;
 }
 
-#header {
-    border-bottom: solid;
-    border-width: 1px;
-    padding-bottom: 0.5em;
-    margin-bottom: 0.5em;
-    display: inline-block;
-}
-
-.hidden {
-	display: none;
+td {
+    border: 1px solid;
 }
 
 h2 {
@@ -30,10 +17,8 @@ h2 {
 	color: green;
 }
 
-div#content {
-    height: 75%;
-    position: relative;
-    bottom: 0px;
+.hidden {
+	display: none;
 }
 
 div#map {
@@ -41,24 +26,25 @@ div#map {
     height: 100%;
 }
 
-div#data_display {
-    width: 50%;
-    height: 100%;
-    position: absolute;
-    z-index: 2000;
-    right: 0px;
-    background-color: rgba(255, 255, 255, 0.6);
-    bottom: 0px;
-    resize: both;
-    display: flex;
-    flex-direction: column;
-}
-
 div#stops_list {
     overflow-y: auto;
 }
 
-#stops_list td a{
+div#stops_list td {
+    padding: 0px;
+}
+
+#stops_list ul {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+}
+
+#stops_list li {
+    list-style-type: none;
+}
+
+div#stops_list td a{
     color: inherit;
 }
 
@@ -104,20 +90,4 @@ li.railway_route {
 
 .selected_route {
     font-weight: bold;
-}
-
-#open_close {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    z-index: 3000;
-}
-
-#stops_list ul {
-    margin: 0px;
-    list-style-type: none;
-}
-
-#stops_list td {
-    /*vertical-align: top;*/
 }
