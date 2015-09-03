@@ -1,9 +1,6 @@
 var opapi = "//overpass-api.de/api/interpreter";
 var osmUrl = "//openstreetmap.org/";
 
-var bench_text   = " <bench>";
-var shelter_text = " <shelter>";
-
 var path_color = {
 	bus: 'blue',
 	subway: 'red',
@@ -16,6 +13,11 @@ var stopIcon = L.icon({
     iconUrl: './img/stop.png',
     iconSize: [12, 12],
 });
+
+var qNet = "";
+var qOp = "";
+var qRef = "";
+var qId = "";
 
 var map = L.map('map')
                .setView([45.75840835755788, 4.895696640014648], 13);
@@ -32,37 +34,96 @@ function getURLParameter(name) {
     return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 }
 
-function bind_events () {
+function bindEvents () {
     // To be executed on page load
 
-	$('#opSelect' ).val(getURLParameter("operator"));
-	$('#netSelect').val(getURLParameter("network"));
-	$('#refSelect').val(getURLParameter("ref"));
-    dlData();
+    // Populate inputs from URL parameters
+    qNet = getURLParameter("network");
+    qOp  = getURLParameter("op");
+    qRef = getURLParameter("ref");
+    qId  = getURLParameter("id");
+    
+	$('#netInput').val(qNet);
+	$('#opInput' ).val(qOp);
+	$('#refInput').val(qRef);
+	$('#idInput').val( qId);
+    chooseQuery();
 }
 
-function dlData() {
-	var bounds = map.getBounds();
-	var bbox = [bounds.getSouth(), bounds.getWest(), bounds.getNorth(), bounds.getEast()].join();
-	var op = $('#opSelect').val();
-	var net = $('#netSelect').val();
-	var ref = $('#refSelect').val();
+function chooseQuery() {
+    if(qId) {
+        getRouteMaster(qId);
+        sidebar.open("data_display");
+    } else if (qRef && (qNet || qOp)) { // Avoid queries which can match too much routes
+        getRouteMasters(qNet, qOp, qRef);
+        sidebar.open("data_display");
+    } else {
+        sidebar.open("query"); // Ask parameters
+    }
+}
 
+function dlRouteMasters(query) {
+    $.ajax(opapi, {
+        type: "POST",
+        data: query,
+    }).done(function (op_data) {
+        displayRouteMasters(op_data);
+        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
+        $("li#data_tab").removeClass("disabled")
+    }).fail(function (op_data) {
+        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
+    }).always(function () {
+        $("#dlForm>input[type=submit]").prop("disabled", false);
+        $("li#data_tab i").removeClass().addClass("fa fa-bars");
+    });
+}
+
+function getRouteMasters(net, op, ref) {
+    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
 	var netstr = net ? ("[network~'" + net + "',i]") : "";
 	var opstr = op ? ("[operator~'" + op + "',i]") : "";
 	var refstr = ref ? ("[ref~'^" + ref + "$',i]") : "";
 
-    // Avoid queries which can match too much routes
-    if(opstr == "" && refstr == "") {
-        sidebar.open("query");
-        return;
-    }
+    query='[out:json];' +
+    'relation["type"="route_master"]' + netstr + opstr + refstr + ';' +
+    'out body;'
+
+    dlRouteMasters(query);
+}
+
+function getRouteMastersBbox() {
+    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
+	var bbox = map.getBounds().toBBoxString();
+
+    query='[out:json];' +
+    'relation["type"="route_master"](' + bbox + ');' +
+    'out tags;'
+
+    dlRouteMasters(query);
+}
+
+function displayRouteMasters(data) {
+    $.each(data.elements, function(i, r) {
+        $("#routemaster-select").append($('<option>', {
+            value: r.id,
+            text: r.tags.name || r.id,
+        }));
+    });
+    $("#routemaster-select").removeClass("hidden");
+    $("#routemaster-dl")
+        .click(function() {
+            getRouteMaster($("#routemaster-select option:selected").val());
+        })
+        .removeClass("hidden");
+}
+
+function getRouteMaster(id) {
     $("li#data_tab").removeClass("disabled");
-    $("li#data_tab i").removeClass("fa-bars").addClass("fa-spinner fa-spin");
+    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
     sidebar.open("data_display");
 
     query='[out:json];' +
-    'relation["type"="route_master"]' + netstr + opstr + refstr + '->.route_masters;' +
+    'relation["type"="route_master"](' + id + ')->.route_masters;' +
     'rel(r.route_masters)->.routes;' +
     'node(r.routes)->.stops;' +
     'way(r.routes)["highway"]->.paths;' +
@@ -88,7 +149,6 @@ function dlData() {
     'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
-    $("#dlForm").append($("<span>").html("Loading...").attr("id", "loadingtext"));
     $.ajax(opapi, {
         type: "POST",
         data: query,
@@ -99,7 +159,6 @@ function dlData() {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
-        $("#loadingtext").remove();
         $("li#data_tab i").removeClass().addClass("fa fa-bars");
     });
 }
@@ -130,9 +189,9 @@ function getTagTable(obj) {
     return tagStr;
 }
 
-function getLatLngArray(obj) {
+function getLatLngArray(osmWay) {
         var latlngs = [];
-        _.each(obj.nodes, function(n) {
+        _.each(osmWay.nodes, function(n) {
             latlngs.push(L.latLng(n.lat, n.lon));
         });
         return latlngs;
@@ -148,8 +207,8 @@ function prepareMarker(obj, parsedData, group) {
         })
         .bindPopup(popupHTML);;
     } else {
-    obj.layer = L.marker([obj.lat, obj.lon])
-                .bindPopup(popupHTML);
+        obj.layer = L.marker([obj.lat, obj.lon])
+                    .bindPopup(popupHTML);
     }
     group.addLayer(obj.layer);
 }
@@ -266,4 +325,4 @@ function findPlatform(data, route, stop_area) {
     return _.intersection(route_platforms, area_platforms);
 }
 
-bind_events();
+bindEvents();

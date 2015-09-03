@@ -27,7 +27,7 @@ div#map {
 }
 
 div#stops_list {
-    overflow-y: auto;
+    overflow: auto;
 }
 
 div#stops_list td {
@@ -90,4 +90,20 @@ li.railway_route {
 
 .selected_route {
     font-weight: bold;
+}
+
+#dlForm {
+    display: table;
+}
+
+#dlForm>p {
+    display: table-row;
+}
+
+#dlForm>p>label {
+    display: table-cell;
+}
+
+#dlForm>p>input {
+    display: table-cell;
 }

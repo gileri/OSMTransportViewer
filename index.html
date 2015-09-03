@@ -2,10 +2,10 @@
 <head>
     <meta charset="utf-8">
     <title>OSM Public Transport Map</title>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
     <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="lib/sidebar-v2/leaflet-sidebar.min.css" />
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="sidebar" class="sidebar collapsed">
@@ -17,6 +17,7 @@
             </ul>
 
             <ul role="tablist">
+                <li><a href="#info-tab" role="tab"><i class="fa fa-info"></i></a></li>
                 <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
             </ul>
         </div>
@@ -29,23 +30,34 @@
                     <div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
                 </h1>
                 <form id="dlForm">
-                    <span id="load_text"></span><input class="hidden" id="overpass_query" />
-                    
-                    <label>Network</label>
-                    <input id="netSelect" name="network" type="text" autofocus="autofocus" /><br />
-
-                    <label>Operator</label>
-                    <input id="opSelect" name="operator" type="text" /><br />
-
-                    <label>Ref</label>
-                    <input id="refSelect" name="ref" type="text" /><br />
-                    <input type="submit" />
+                    <p>
+                        <label>Network</label>
+                        <input id="netInput" name="network" type="text" autofocus="autofocus" />
+                    </p>
+                    <p>
+                        <label>Operator</label>
+                        <input id="opInput" name="operator" type="text" />
+                    </p>
+                    <p>
+                        <label>Ref</label>
+                        <input id="refInput" name="ref" type="text" />
+                    </p>
+                    <p>
+                        <label>ID(route_master)</label>
+                        <input id="idInput" name="id" type="text" />
+                    </p>
+                    <p>
+                        <input type="submit" />
+                        <input type="reset" />
+                    </p>
                 </form>
 
             </div>
 
             <div class="sidebar-pane" id="data_display">
                 <h1 class="sidebar-header">Data<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+                <select id="routemaster-select" class="hidden"></select>
+                <button id="routemaster-dl" class="hidden"><i class="fa fa-cloud-download"></i></button>
                 <div id="routes_list">
                     <ul>
                     </ul>
@@ -53,7 +65,7 @@
                 <div id="stops_list">
                     <table>
                     <tr class="hidden" id="stop_list_header">
-                        <th>Nom</th>
+                        <th>Stop Position</th>
                         <th>Stop Area</th>
                         <th>Platform</th>
                         <th>Shelter</th>
@@ -63,8 +75,8 @@
                 </div>
             </div>
 
-            <div class="sidebar-pane" id="messages">
-                <h1 class="sidebar-header">Messages<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+            <div class="sidebar-pane" id="info-tab">
+                <h1 class="sidebar-header">Informations<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
             </div>
 
             <div class="sidebar-pane" id="settings">
