@@ -46,7 +46,7 @@ function chooseQuery() {
     if(osmQuery.id) {
         getRouteMaster(osmQuery.id);
         sidebar.open("data_display");
-    } else if (osmQuery.ref && (osmQuery.network || osmQuery.operator)) { // Avoid queries which can match too much routes
+    } else if (osmQuery.network || osmQuery.operator) { // Avoid queries which can match too much routes
         getRouteMasters(osmQuery.network, osmQuery.operator, osmQuery.ref);
         sidebar.open("data_display");
     } else {
