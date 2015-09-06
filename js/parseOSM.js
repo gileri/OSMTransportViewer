@@ -85,6 +85,8 @@ var parseOSM = function (data) {
                         r.platforms.push(m);
                     break;
                     case "":
+                    case "forward":
+                    case "backward":
                         r.paths.push(m);
                     break;
                 }
