@@ -66,7 +66,6 @@ function dlRouteMasters(query) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
-        $("li#data_tab i").removeClass().addClass("fa fa-bars");
     });
 }
 
@@ -152,7 +151,6 @@ function getRouteMaster(id) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
-        $("li#data_tab i").removeClass().addClass("fa fa-bars");
     });
 }
 
