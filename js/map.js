@@ -118,25 +118,28 @@ function getRouteMaster(id) {
     'relation["type"="route_master"](' + id + ')->.route_masters;' +
     'rel(r.route_masters)->.routes;' +
     'node(r.routes)->.stops;' +
-    'way(r.routes)["highway"]->.paths;' +
+    '(' +
+      'way(r.routes)["highway"];' +
+      'way(r.routes)["railway"];' +
+    ')->.paths;' +
     'node(w.paths)->.paths_nodes;' +
     '(' +
-    '  node(r.routes:"platform");' +
-    '  way (r.routes:"platform");' +
+      'node(r.routes:"platform");' +
+      'way (r.routes:"platform");' +
     ');' +
     '(._;>;)->.platforms;' +
     '(' +
-    '  relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
-    '  relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
+      'relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
+      'relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
     ')->.stop_areas;' +
     '(' +
-    '  .route_masters;' +
-    '  .routes;' +
-    '  .stop_areas;' +
-    '  .stops;' +
-    '  .paths;' +
-    '  .platforms;' +
-    '  .paths_nodes;' +
+      '.route_masters;' +
+      '.routes;' +
+      '.stop_areas;' +
+      '.stops;' +
+      '.paths;' +
+      '.platforms;' +
+      '.paths_nodes;' +
     ');' +
     'out body;';
 
