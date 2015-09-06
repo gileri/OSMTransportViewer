@@ -1,4 +1,4 @@
-var opapi = "//overpass-api.de/api/interpreter";
+var opapi =  "//overpass-api.de/api/interpreter";
 var osmUrl = "//openstreetmap.org/";
 
 var path_color = {
@@ -14,10 +14,9 @@ var stopIcon = L.icon({
     iconSize: [12, 12],
 });
 
-var qNet = "";
-var qOp = "";
-var qRef = "";
-var qId = "";
+var options = {};
+
+var osmQuery = {};
 
 var map = L.map('map')
                .setView([45.75840835755788, 4.895696640014648], 13);
@@ -29,33 +28,26 @@ L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var sidebar = L.control.sidebar('sidebar').addTo(map);
 var routeLayer;
 
-function getURLParameter(name) {
-    // From http://stackoverflow.com/a/11582513/1032870
-    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-}
-
 function bindEvents () {
     // To be executed on page load
 
     // Populate inputs from URL parameters
-    qNet = getURLParameter("network");
-    qOp  = getURLParameter("op");
-    qRef = getURLParameter("ref");
-    qId  = getURLParameter("id");
+    var uri = URI();
+    osmQuery = uri.search(true);
     
-	$('#netInput').val(qNet);
-	$('#opInput' ).val(qOp);
-	$('#refInput').val(qRef);
-	$('#idInput').val( qId);
+	$('#netInput').val(osmQuery.network);
+	$('#opInput' ).val(osmQuery.operator);
+	$('#refInput').val(osmQuery.ref);
+	$('#idInput').val( osmQuery.id);
     chooseQuery();
 }
 
 function chooseQuery() {
-    if(qId) {
-        getRouteMaster(qId);
+    if(osmQuery.id) {
+        getRouteMaster(osmQuery.id);
         sidebar.open("data_display");
-    } else if (qRef && (qNet || qOp)) { // Avoid queries which can match too much routes
-        getRouteMasters(qNet, qOp, qRef);
+    } else if (osmQuery.ref && (osmQuery.network || osmQuery.operator)) { // Avoid queries which can match too much routes
+        getRouteMasters(osmQuery.network, osmQuery.operator, osmQuery.ref);
         sidebar.open("data_display");
     } else {
         sidebar.open("query"); // Ask parameters
@@ -80,6 +72,7 @@ function dlRouteMasters(query) {
 
 function getRouteMasters(net, op, ref) {
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
+
 	var netstr = net ? ("[network~'" + net + "',i]") : "";
 	var opstr = op ? ("[operator~'" + op + "',i]") : "";
 	var refstr = ref ? ("[ref~'^" + ref + "$',i]") : "";
@@ -205,7 +198,7 @@ function prepareMarker(obj, parsedData, group) {
             color: 'red',
             weight: 12
         })
-        .bindPopup(popupHTML);;
+        .bindPopup(popupHTML);
     } else {
         obj.layer = L.marker([obj.lat, obj.lon])
                     .bindPopup(popupHTML);
