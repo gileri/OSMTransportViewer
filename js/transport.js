@@ -15,7 +15,6 @@ var stopIcon = L.icon({
 });
 
 var options = {};
-
 var osmQuery = {};
 
 var map = L.map('map')
@@ -172,7 +171,10 @@ function displayOnMap(parsedData, route) {
         preparePath(obj, parsedData, routeLayer);
     });
     map.fitBounds(
-        L.featureGroup(routeLayer).getBounds()
+        L.featureGroup(routeLayer.getLayers()).getBounds(),
+        {
+            paddingTopLeft: [500,0],
+        }
     );
     routeLayer.addTo(map);
 }
