@@ -171,6 +171,9 @@ function displayOnMap(parsedData, route) {
     _.each(route.paths, function(obj, index, parsedData) {
         preparePath(obj, parsedData, routeLayer);
     });
+    map.fitBounds(
+        L.featureGroup(routeLayer).getBounds()
+    );
     routeLayer.addTo(map);
 }
 
