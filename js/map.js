@@ -230,7 +230,8 @@ function parseAndDisplay(op_data) {
             .on("click", function(event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
                 $(this).addClass("selected_route");
-                displayRoute(parsed, parsed.routes[$(this).data("osmID")]);
+                displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
+                displayOnMap(parsed, parsed.routes[$(this).data("osmID")])
             })
             .appendTo(routeLi);
         $("<a>", {href: osmUrl + "relation" + "/" + r.id})
@@ -241,8 +242,7 @@ function parseAndDisplay(op_data) {
     });
 };
 
-var displayRoute = function(data, route) {
-    displayOnMap(data, route)
+var displayRouteData = function(data, route) {
     // Un-hide stop list table header
     $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display
