@@ -72,6 +72,11 @@ li[class*='_route'] {
     cursor: pointer;
 }
 
+li[class*='_route']>span:hover {
+    cursor: pointer;
+    text-decoration: underline
+}
+
 li.bus_route, li.trolleybus_route {
     list-style-image: url('../lib/osmic/bus-stop-14.png');
 }
