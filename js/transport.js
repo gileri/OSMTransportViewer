@@ -14,6 +14,10 @@ var stopIcon = L.icon({
     iconSize: [12, 12],
 });
 
+var mapPadding = {
+    paddingTopLeft: [500,0],
+}
+
 var options = {};
 var osmQuery = {};
 
@@ -38,8 +42,14 @@ function bindEvents () {
 	$('#opInput' ).val(osmQuery.operator);
 	$('#refInput').val(osmQuery.ref);
 	$('#idInput').val( osmQuery.id);
+
+    map.on('locationfound', function(l) {
+        map.fitBounds(l.bounds, mapPadding);
+    });
+
     chooseQuery();
 }
+
 
 function chooseQuery() {
     if(osmQuery.id) {
@@ -47,8 +57,10 @@ function chooseQuery() {
         sidebar.open("data_display");
     } else if (osmQuery.network || osmQuery.operator) { // Avoid queries which can match too much routes
         getRouteMasters(osmQuery.network, osmQuery.operator, osmQuery.ref);
+        map.locate();
         sidebar.open("data_display");
     } else {
+        map.locate();
         sidebar.open("query"); // Ask parameters
     }
 }
@@ -171,12 +183,7 @@ function displayOnMap(parsedData, route) {
     _.each(route.paths, function(obj, index, parsedData) {
         preparePath(obj, parsedData, routeLayer);
     });
-    map.fitBounds(
-        L.featureGroup(routeLayer.getLayers()).getBounds(),
-        {
-            paddingTopLeft: [500,0],
-        }
-    );
+    map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
     routeLayer.addTo(map);
 }
 
