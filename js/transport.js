@@ -94,7 +94,8 @@ function getRouteMastersBbox() {
 }
 
 function displayRouteMasters(data) {
-    $.each(data.elements, function(i, r) {
+    var sorted = _.sortBy(data.elements, function(e) {return e.tags.name});
+    $.each(sorted, function(i, r) {
         $("#routemaster-select").append($('<option>', {
             value: r.id,
             text: r.tags.name || r.id,
