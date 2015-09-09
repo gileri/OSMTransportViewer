@@ -19,7 +19,7 @@ var mapPadding = {
 }
 
 var options = {};
-var osmQuery = {};
+var globalState = {};
 
 var map = L.map('map')
                .setView([45.75840835755788, 4.895696640014648], 13);
@@ -34,38 +34,60 @@ var routeLayer;
 function bindEvents () {
     // To be executed on page load
 
-    // Populate inputs from URL parameters
     var uri = URI();
-    osmQuery = uri.search(true);
+    // Restore global state from URL parameters
+    globalState = uri.search(true);
     
-	$('#netInput').val(osmQuery.network);
-	$('#opInput' ).val(osmQuery.operator);
-	$('#refInput').val(osmQuery.ref);
-	$('#idInput').val( osmQuery.id);
+    $('#dlForm').submit(function(e) {
+        e.preventDefault();
+
+        $(this).find("input[type='text']").each(function() {
+            globalState[$(this).attr("name")] = $(this).val();
+        });
+        updateURLForm();
+        getRouteMasters(globalState.network, globalState.operator, globalState.ref);
+        sidebar.open("data_display");
+    });
 
     map.on('locationfound', function(l) {
         map.fitBounds(l.bounds, mapPadding);
     });
 
+    map.on('moveend', function() {
+        globalState.lat = map.getCenter().lat.toFixed(5)
+        globalState.lng = map.getCenter().lng.toFixed(5)
+        globalState.z   = map.getZoom()
+        updateURLForm();
+    });
+
     chooseQuery();
 }
 
+function updateURLForm() {
+    var uri = URI();
+    uri.setSearch(globalState);
+    history.pushState({globalState: globalState}, null, uri.toString());
+
+    $("#dlForm input[type='text']").each(function() {
+        $(this).val(globalState[$(this).attr("name")]);
+    })
+}
 
 function chooseQuery() {
-    if(osmQuery.id) {
-        getRouteMaster(osmQuery.id);
+    map.locate();
+    if(globalState.id) {
+        getRouteMaster(globalState.id);
         sidebar.open("data_display");
-    } else if (osmQuery.network || osmQuery.operator) { // Avoid queries which can match too much routes
-        getRouteMasters(osmQuery.network, osmQuery.operator, osmQuery.ref);
-        map.locate();
+    } else if (globalState.network || globalState.operator) { // Avoid queries which can match too much routes
+        getRouteMasters(globalState.network, globalState.operator, globalState.ref);
         sidebar.open("data_display");
     } else {
-        map.locate();
         sidebar.open("query"); // Ask parameters
     }
 }
 
 function dlRouteMasters(query) {
+    updateURLForm();
     $.ajax(opapi, {
         type: "POST",
         data: query,
@@ -96,10 +118,10 @@ function getRouteMasters(net, op, ref) {
 
 function getRouteMastersBbox() {
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
-	var bbox = map.getBounds().toBBoxString();
+	globalState.bbox = map.getBounds().toBBoxString();
 
     query='[out:json];' +
-    'relation["type"="route_master"](' + bbox + ');' +
+    'relation["type"="route_master"](' + globalState.bbox + ');' +
     'out tags;'
 
     dlRouteMasters(query);
@@ -116,12 +138,15 @@ function displayRouteMasters(data) {
     $("#routemaster-select").removeClass("hidden");
     $("#routemaster-dl")
         .click(function() {
-            getRouteMaster($("#routemaster-select option:selected").val());
+            var masterId = $("#routemaster-select option:selected").val();
+            globalState.rmid = masterId;
+            getRouteMaster(masterId);
         })
         .removeClass("hidden");
 }
 
 function getRouteMaster(id) {
+    updateURLForm();
     $("li#data_tab").removeClass("disabled");
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
     sidebar.open("data_display");
@@ -243,6 +268,7 @@ function parseAndDisplay(op_data) {
             .on("click", function(event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
                 $(this).addClass("selected_route");
+                updateURLForm();
                 displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
                 displayOnMap(parsed, parsed.routes[$(this).data("osmID")])
             })
