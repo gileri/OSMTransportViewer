@@ -25,8 +25,12 @@ Have *fun* with Public Transport !
 
 Data from [OpenStreetMap](http://www.openstreetmap.org) © OpenStreetMap contributors
 
+A lot of inspiration from [checkautopista2](https://github.com/k1wiosm/checkautopista2)
+
 Data filtering thanks to [Overpass API](http://wiki.openstreetmap.org/wiki/Overpass_API) (default server : [overpass-api.de](http://overpass-api.de/))
 
-jQuery
+[jQuery](http://jquery.com/)
 
-Leaflet
+[Leaflet](http://leafletjs.com)
+
+[sidebar-v2](https://github.com/Turbo87/sidebar-v2/)
