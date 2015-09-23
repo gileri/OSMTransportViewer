@@ -3,7 +3,7 @@ var haveTag = function(obj, key, value) {
         return false;
     if(!value)
         return (key in obj.tags);
-    return (obj.tags[key] === value);
+    return (obj.tags[key] == value);
 }
 
 
