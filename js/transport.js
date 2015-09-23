@@ -15,7 +15,7 @@ var stopIcon = L.icon({
 });
 
 var mapPadding = {
-    paddingTopLeft: [500,0],
+    paddingTopLeft: [500,50],
 }
 
 var options = {};
