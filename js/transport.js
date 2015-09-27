@@ -1,4 +1,3 @@
-var opapi =  "//overpass-api.de/api/interpreter";
 var osmUrl = "//openstreetmap.org/";
 
 var path_color = {
@@ -18,7 +17,9 @@ var mapPadding = {
     paddingTopLeft: [500,50],
 }
 
-var options = {};
+var defaultOptions = {
+    "opapi": "//overpass-api.de/api"
+};
 var globalState = {};
 
 var map = L.map('map')
@@ -88,7 +89,7 @@ function chooseQuery() {
 
 function dlRouteMasters(query) {
     updateURLForm();
-    $.ajax(opapi, {
+    $.ajax(localStorage.getItem("opapi") + "/interpreter", {
         type: "POST",
         data: query,
     }).done(function (op_data) {
@@ -182,7 +183,7 @@ function getRouteMaster(id) {
     'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
-    $.ajax(opapi, {
+    $.ajax(localStorage.getItem("opapi") + "/interpreter", {
         type: "POST",
         data: query,
     }).done(function (op_data) {
@@ -359,4 +360,13 @@ function findPlatform(data, route, stop_area) {
     return _.intersection(route_platforms, area_platforms);
 }
 
+function initOptions() {
+    for (o in defaultOptions) {
+        if(!localStorage.getItem(o)) {
+            localStorage.setItem(o, defaultOptions[o]);
+        }
+    }
+}
+
+initOptions();
 bindEvents();
