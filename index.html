@@ -29,7 +29,7 @@
                     Query
                     <div class="sidebar-close"><i class="fa fa-caret-left"></i></div>
                 </h1>
-                <form id="dlForm">
+                <form id="dlForm" class="input-table">
                     <p>
                         <label>Network</label>
                         <input name="network" type="text" autofocus="autofocus" />
@@ -57,7 +57,7 @@
             <div class="sidebar-pane" id="data_display">
                 <h1 class="sidebar-header">Data<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
                 <select id="routemaster-select" class="hidden"></select>
-                <button id="routemaster-dl" class="hidden"><i class="fa fa-cloud-download"></i></button>
+                <button id="routemaster-dl" class="hidden">Download variants</button>
                 <div id="routes_list">
                     <ul>
                     </ul>
@@ -88,6 +88,17 @@
 
             <div class="sidebar-pane" id="settings">
                 <h1 class="sidebar-header">Settings<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+                <div class="input-table">
+                    <p>
+                        <label>Overpass server</label>
+                        <input id="overpass-server" list="default-servers" value="//overpass-api.de/api" />
+                        <datalist id="default-servers">
+                            <option value="//overpass-api.de/api">
+                            <option value="http://overpass.osm.rambler.ru/cgi">
+                            <option value="http://api.openstreetmap.fr/oapi">
+                        </datalist>
+                    </p>
+                </div>
             </div>
         </div>
     </div>

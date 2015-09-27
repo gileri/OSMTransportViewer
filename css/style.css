@@ -99,17 +99,18 @@ li.railway_route {
 
 #dlForm {
     display: table;
+    border-spacing: 0px 10px;
 }
 
-#dlForm>p {
+.input-table>p {
     display: table-row;
 }
 
-#dlForm>p>label {
+.input-table>p>label {
     display: table-cell;
 }
 
-#dlForm>p>input {
+.input-table>p>input {
     display: table-cell;
 }
 
