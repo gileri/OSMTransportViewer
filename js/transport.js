@@ -23,12 +23,16 @@ var defaultOptions = {
 var globalState = {};
 
 var map = L.map('map')
-               .setView([45.75840835755788, 4.895696640014648], 13);
+               .setView([45.75840835, 4.8956966], 13);
+
+// Ask user location. See map.on('locationfound')
+map.locate();
 
 L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18
 }).addTo(map);
+
 var sidebar = L.control.sidebar('sidebar').addTo(map);
 var routeLayer;
 
@@ -76,8 +80,7 @@ function updateURLForm() {
     })
 }
 
-function chooseQuery() {
-    map.locate();
+function guessQuery() {
     if(globalState.id) {
         getRouteMaster(globalState.id);
         sidebar.open("data_display");
@@ -289,7 +292,7 @@ var displayRouteData = function(data, route) {
     // Un-hide stop list table header
     $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display
-    $('#stops_list>table').find("tr:gt(0)").remove();
+    $('#stops-list>table').find("tr:gt(0)").remove();
     var stop_li;
     _.each(route.members, function(member) {
         stop_tr = $("<tr>");
@@ -350,7 +353,7 @@ var displayRouteData = function(data, route) {
         $("<td>").append(platform_ul).appendTo(stop_tr);
         $("<td>").append(shelter_ul).appendTo(stop_tr);
         $("<td>").append(bench_ul).appendTo(stop_tr);
-        $('#stops_list>table').append(stop_tr);
+        $('#stops-list>table').append(stop_tr);
     });
 }
 
@@ -385,4 +388,4 @@ function populateOptionsInputs() {
 
 initOptions();
 bindEvents();
-chooseQuery();
+guessQuery();

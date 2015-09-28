@@ -26,25 +26,25 @@ div#map {
     height: 100%;
 }
 
-div#stops_list {
+div#stops-list {
     overflow: auto;
 }
 
-div#stops_list td {
+div#stops-list td {
     padding: 0px;
 }
 
-div#stops_list ul {
+div#stops-list ul {
     margin: 0px;
     padding: 0px;
     list-style-type: none;
 }
 
-div#stops_list li {
+div#stops-list li {
     list-style-type: none;
 }
 
-div#stops_list td a{
+div#stops-list td a{
     color: inherit;
 }
 
