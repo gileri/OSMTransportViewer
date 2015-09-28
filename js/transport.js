@@ -213,7 +213,10 @@ function displayOnMap(parsedData, route) {
         prepareMarker(obj, parsedData, routeLayer);
     });
     _.each(route.paths, function(obj, index, parsedData) {
-        preparePath(obj, parsedData, routeLayer);
+        prepareMarker(obj, parsedData, routeLayer, {
+            color: path_color[route.tags.route] || "red",
+
+        });
     });
     map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
     routeLayer.addTo(map);
@@ -236,29 +239,26 @@ function getLatLngArray(osmWay) {
         return latlngs;
 }
 
-function prepareMarker(obj, parsedData, group) {
+function prepareMarker(obj, parsedData, group, overrideStyle) {
     var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
     if(obj.type == "way") {
-        latlngs = getLatLngArray(obj);
-        obj.layer = L.polyline(latlngs,{
-            color: 'red',
-            weight: 12
-        })
-        .bindPopup(popupHTML);
+        var latlngs = getLatLngArray(obj);
+        if(obj.tags["public_transport"]=="platform") {
+            obj.layer = L.polyline(latlngs,{
+                color: 'red',
+                weight: 12
+            }).bindPopup(popupHTML);
+        }
+        else {
+            obj.layer = L.polyline(latlngs,$.extend({
+                weight: 4
+            }, overrideStyle)).bindPopup(popupHTML);
+       }
     } else {
         obj.layer = L.marker([obj.lat, obj.lon])
                     .bindPopup(popupHTML);
     }
     group.addLayer(obj.layer);
-}
-
-function preparePath(obj, parsedData, group) {
-    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
-    var latlngs = getLatLngArray(obj);
-    group.addLayer(L.polyline(latlngs, {
-        color: 'green'
-    })
-    .bindPopup(popupHTML));
 }
 
 function parseAndDisplay(op_data) {
