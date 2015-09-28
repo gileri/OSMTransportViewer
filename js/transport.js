@@ -61,7 +61,9 @@ function bindEvents () {
         updateURLForm();
     });
 
-    chooseQuery();
+    $(".otv-settings").on('change', function(e) {
+        localStorage.setItem($(this).attr('id'), $(this).val());
+    });
 }
 
 function updateURLForm() {
@@ -89,7 +91,7 @@ function chooseQuery() {
 
 function dlRouteMasters(query) {
     updateURLForm();
-    $.ajax(localStorage.getItem("opapi") + "/interpreter", {
+    $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
         data: query,
     }).done(function (op_data) {
@@ -183,7 +185,7 @@ function getRouteMaster(id) {
     'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
-    $.ajax(localStorage.getItem("opapi") + "/interpreter", {
+    $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
         data: query,
     }).done(function (op_data) {
@@ -362,11 +364,25 @@ function findPlatform(data, route, stop_area) {
 
 function initOptions() {
     for (o in defaultOptions) {
-        if(!localStorage.getItem(o)) {
-            localStorage.setItem(o, defaultOptions[o]);
+        if(!localStorage.getItem("otv-" + o)) {
+            // Add a prefix to localStored options to avoid conflicts
+            localStorage.setItem("otv-" + o, defaultOptions[o]);
         }
+    }
+    $(".otv-settings").each(function(o) {
+        $(this).val(localStorage.getItem($(this).attr('id')));
+    });
+}
+
+function populateOptionsInputs() {
+    var filteredLocalStorage = _.filter(localStorage, function(i){
+        return i.lastIndexOf(i, 0);
+    });
+    for (o in filteredLocalStorage) {
+        $("#" + o).value(localStorage.getItem(o));
     }
 }
 
 initOptions();
 bindEvents();
+chooseQuery();
