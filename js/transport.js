@@ -22,6 +22,19 @@ var defaultOptions = {
 };
 var globalState = {};
 
+L.LatLngBounds.prototype.trim = function(precision) {
+    this._northEast.lat = this._northEast.lat.toFixed(precision);
+    this._northEast.lng = this._northEast.lng.toFixed(precision);
+    this._southWest.lat = this._southWest.lat.toFixed(precision);
+    this._southWest.lng = this._southWest.lng.toFixed(precision);
+    return this;
+}
+
+L.LatLngBounds.prototype.toXobbString = function() {
+    // Return bbox string compatible with Overpass API
+    return this._southWest.lat + "," + this._southWest.lng + "," + this._northEast.lat + "," + this._northEast.lng;
+}
+
 var map = L.map('map')
                .setView([45.75840835, 4.8956966], 13);
 
@@ -42,6 +55,9 @@ function bindEvents () {
     var uri = URI();
     // Restore global state from URL parameters
     globalState = uri.search(true);
+    if(globalState.bb) {
+        $("#bb-check").prop('checked', true);
+    }
     
     $('#dlForm').submit(function(e) {
         e.preventDefault();
@@ -49,8 +65,9 @@ function bindEvents () {
         $(this).find("input[type='text']").each(function() {
             globalState[$(this).attr("name")] = $(this).val();
         });
+        // TODO Add bb to globalState if selected
         updateURLForm();
-        getRouteMasters(globalState.network, globalState.operator, globalState.ref);
+        getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     });
 
@@ -62,30 +79,42 @@ function bindEvents () {
         globalState.lat = map.getCenter().lat.toFixed(5)
         globalState.lng = map.getCenter().lng.toFixed(5)
         globalState.z   = map.getZoom()
+        if($("#bb-check").prop("checked")) {
+            globalState.bb = map.getBounds().trim(5).toXobbString();
+        }
         updateURLForm();
     });
 
     $(".otv-settings").on('change', function(e) {
         localStorage.setItem($(this).attr('id'), $(this).val());
     });
+
+    $("#bb-check").on('change', function(e) {
+        if($(this).is(':checked')) {
+            globalState.bb = map.getBounds().trim(5).toXobbString();
+        } else {
+            delete globalState.bb;
+        }
+        updateURLForm();
+    });
 }
 
 function updateURLForm() {
     var uri = URI();
-    uri.setSearch(globalState);
+    uri.search(globalState);
     history.pushState({globalState: globalState}, null, uri.toString());
 
-    $("#dlForm input[type='text']").each(function() {
-        $(this).val(globalState[$(this).attr("name")]);
-    })
+    //$("#dlForm input.[type='text']").each(function() {
+    //    $(this).val(globalState[$(this).attr("name")]);
+    //})
 }
 
 function guessQuery() {
     if(globalState.id) {
         getRouteMaster(globalState.id);
         sidebar.open("data_display");
-    } else if (globalState.network || globalState.operator) { // Avoid queries which can match too much routes
-        getRouteMasters(globalState.network, globalState.operator, globalState.ref);
+    } else if (globalState.rmid || globalState.network || globalState.operator || globalState.bb) { // Avoid queries which can match too much routes
+        getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     } else {
         sidebar.open("query"); // Ask parameters
@@ -105,31 +134,36 @@ function dlRouteMasters(query) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
+        if(globalState.rmid) {
+            //if(!document.getElementById('routemaster-select').options.indexOf(globalState.rmid)) {
+            //    $("#routemaster-select").append($("<option>", {
+            //        value : rmid
+            //    }));
+            //}
+            $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
+            getRouteMaster(globalState.rmid);
+        }
     });
 }
 
-function getRouteMasters(net, op, ref) {
+function getRouteMasters(net, op, ref, bbox) {
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
 
-	var netstr = net ? ("[network~'" + net + "',i]") : "";
-	var opstr = op ? ("[operator~'" + op + "',i]") : "";
-	var refstr = ref ? ("[ref~'^" + ref + "$',i]") : "";
+	var netstr = net  ? ("[network~'" + net + "',i]") : "";
+	var opstr =  op   ? ("[operator~'" + op + "',i]") : "";
+	var refstr = ref  ? ("[ref~'^" + ref + "$',i]")   : "";
 
-    query='[out:json];' +
-    'relation["type"="route_master"]' + netstr + opstr + refstr + ';' +
-    'out body;'
-
-    dlRouteMasters(query);
-}
-
-function getRouteMastersBbox() {
-    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
-	globalState.bbox = map.getBounds().toBBoxString();
-
-    query='[out:json];' +
-    'relation["type"="route_master"](' + globalState.bbox + ');' +
-    'out tags;'
-
+    if(bbox) {
+        var bbox =   bbox ? ("(" + bbox + ")") : "";
+        var query = '[out:json];' +
+        'relation["type"="route"]' + bbox + ";" +
+        'relation(br)' + netstr + opstr + refstr + ';' +
+        'out body;';
+    } else {
+        var query = '[out:json];' +
+        'relation["type"="route_master"]' + netstr + opstr + refstr + ';' +
+        'out body;';
+    }
     dlRouteMasters(query);
 }
 
@@ -147,12 +181,13 @@ function displayRouteMasters(data) {
         .click(function() {
             var masterId = $("#routemaster-select option:selected").val();
             globalState.rmid = masterId;
-            getRouteMaster(masterId);
+            getRouteMaster(globalState.rmid);
         })
         .removeClass("hidden");
 }
 
 function getRouteMaster(id) {
+    $("#routemaster-dl").prop('disabled', true);
     updateURLForm();
     $("li#data_tab").removeClass("disabled");
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
@@ -198,6 +233,7 @@ function getRouteMaster(id) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
+        $("#routemaster-dl").prop('disabled', false);
     });
 }
 
