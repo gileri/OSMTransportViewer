@@ -79,6 +79,8 @@ var parseOSM = function (data) {
             _.each(r.members, function(m) {
                 switch(m.role) {
                     case "stop":
+                    case "stop_entry_only":
+                    case "stop_exit_only":
                         r.stop_positions.push(m);
                     break;
                     case "platform":
