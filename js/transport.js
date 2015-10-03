@@ -126,14 +126,22 @@ function guessQuery() {
 
 function dlRouteMasters(query) {
     updateURLForm();
+    $("#data-error").empty();
     $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
         data: query,
-    }).done(function (op_data) {
-        displayRouteMasters(op_data);
-        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
+    }).done(function (op_data, a, b) {
+        $("li#data_tab i").removeClass("fa-spin fa-spinner");
         $("li#data_tab").removeClass("disabled")
-    }).fail(function (op_data) {
+        if(op_data.elements.length === 0) {
+            $("#data-error").html('No route_master found');
+            $("li#data_tab i").addClass("fa-exclamation-triangle");
+        } else {
+            displayRouteMasters(op_data);
+            $("li#data_tab i").addClass("fa-bars");
+        }
+    }).fail(function (op_data, error, exception) {
+        $("#data-error").html(error);
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
@@ -221,6 +229,7 @@ function getRouteMaster(id) {
     'out body;';
 
     $("#dlForm>input[type=submit]").prop("disabled", true);
+    $("#data-error").empty();
     $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
         data: query,

@@ -117,3 +117,12 @@ li.railway_route {
 .sidebar-header {
     margin-bottom: 15px;
 }
+
+div#data-error {
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-top: -17px;
+    padding-left: 20px;
+    color: white;
+    background-color: red;
+}
