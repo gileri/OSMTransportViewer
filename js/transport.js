@@ -63,9 +63,12 @@ function bindEvents () {
         e.preventDefault();
 
         $(this).find("input[type='text']").each(function() {
-            globalState[$(this).attr("name")] = $(this).val();
+            if($(this).val()) {
+                globalState[$(this).attr("name")] = $(this).val();
+            } else {
+                delete globalState[$(this).attr("name")];
+            }
         });
-        // TODO Add bb to globalState if selected
         updateURLForm();
         getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
