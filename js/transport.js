@@ -135,11 +135,6 @@ function dlRouteMasters(query) {
     }).always(function () {
         $("#dlForm>input[type=submit]").prop("disabled", false);
         if(globalState.rmid) {
-            //if(!document.getElementById('routemaster-select').options.indexOf(globalState.rmid)) {
-            //    $("#routemaster-select").append($("<option>", {
-            //        value : rmid
-            //    }));
-            //}
             $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
             getRouteMaster(globalState.rmid);
         }
