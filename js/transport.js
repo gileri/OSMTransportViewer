@@ -234,7 +234,7 @@ function getRouteMaster(id) {
         type: "POST",
         data: query,
     }).done(function (op_data) {
-        parseAndDisplay(op_data);
+        displayRoutes(parseOSM(op_data));
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
     }).fail(function (op_data) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
@@ -304,9 +304,7 @@ function prepareMarker(obj, parsedData, group, overrideStyle) {
     group.addLayer(obj.layer);
 }
 
-function parseAndDisplay(op_data) {
-    var parsed = parseOSM(op_data);
-
+function displayRoutes(parsed) {
     // Clear data display before new display
     $("#routes_list ul").empty()
 
