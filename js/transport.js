@@ -311,7 +311,7 @@ function displayRoutes(parsed) {
     _.each(parsed.routes, function(r) {
         var routeLi = $("<li>").addClass(r.tags.route + "_route");
         $("<span>")
-            .text(r.tags.name + " ")
+            .text(" " + r.tags.name)
             .data("osmID", r.id)
             .on("click", function(event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
@@ -322,8 +322,9 @@ function displayRoutes(parsed) {
             })
             .appendTo(routeLi);
         $("<a>", {href: osmUrl + "relation" + "/" + r.id})
-            .text("(rel ↗)")
-            .appendTo(routeLi);
+            .text("(↗)")
+            .attr("target","_blank")
+            .prependTo(routeLi);
 
         $("#routes_list>ul").append(routeLi);
     });

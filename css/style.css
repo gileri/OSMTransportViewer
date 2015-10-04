@@ -70,11 +70,19 @@ div#stops-list td a{
 
 li[class*='_route'] {
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    list-style-position: inside;
+}
+
+li[class*='_route']:hover {
+    white-space: normal;
 }
 
 li[class*='_route']>span:hover {
     cursor: pointer;
-    text-decoration: underline
+    text-decoration: underline;
 }
 
 li.bus_route, li.trolleybus_route {
@@ -95,6 +103,7 @@ li.railway_route {
 
 .selected_route {
     font-weight: bold;
+    white-space: normal;
 }
 
 #dlForm {
@@ -125,4 +134,8 @@ div#data-error {
     padding-left: 20px;
     color: white;
     background-color: red;
+}
+
+div#routes_list>ul {
+    padding-left: 0px;
 }
