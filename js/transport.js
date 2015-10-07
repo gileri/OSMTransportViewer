@@ -8,9 +8,9 @@ var path_color = {
 };
 var path_weight = 2;
 
-var stopIcon = L.icon({
-    iconUrl: './img/stop.png',
-    iconSize: [12, 12],
+var iconStopPosition = L.icon({
+    iconUrl: './img/stop_position_32.png',
+    iconSize: [12, 12]
 });
 
 var mapPadding = {
@@ -282,14 +282,14 @@ function getLatLngArray(osmWay) {
         return latlngs;
 }
 
-function prepareMarker(obj, parsedData, group, overrideStyle) {
+function prepareMarker(obj, group, overrideStyle) {
     var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
     if(obj.type == "way") {
         var latlngs = getLatLngArray(obj);
         if(obj.tags["public_transport"]=="platform") {
             obj.layer = L.polyline(latlngs,{
-                color: 'red',
-                weight: 12
+                color: 'purple',
+                weight: 8
             }).bindPopup(popupHTML);
         }
         else {
@@ -298,8 +298,15 @@ function prepareMarker(obj, parsedData, group, overrideStyle) {
             }, overrideStyle)).bindPopup(popupHTML);
        }
     } else {
-        obj.layer = L.marker([obj.lat, obj.lon])
-                    .bindPopup(popupHTML);
+        if(obj.tags["public_transport"]=="stop_position") {
+            obj.layer = L.marker([obj.lat, obj.lon], {
+                icon: iconStopPosition
+            })
+            .bindPopup(popupHTML);
+        } else {
+            obj.layer = L.marker([obj.lat, obj.lon])
+            .bindPopup(popupHTML);
+        }
     }
     group.addLayer(obj.layer);
 }
