@@ -250,13 +250,13 @@ function displayOnMap(parsedData, route) {
     routeLayer = L.layerGroup();
 
     _.each(route.stop_positions, function(obj, index, parsedData) {
-        prepareMarker(obj, parsedData, routeLayer);
+        prepareMarker(obj, routeLayer);
     });
     _.each(route.platforms, function(obj, index, parsedData) {
-        prepareMarker(obj, parsedData, routeLayer);
+        prepareMarker(obj, routeLayer);
     });
     _.each(route.paths, function(obj, index, parsedData) {
-        prepareMarker(obj, parsedData, routeLayer, {
+        prepareMarker(obj, routeLayer, {
             color: path_color[route.tags.route] || "red",
 
         });
