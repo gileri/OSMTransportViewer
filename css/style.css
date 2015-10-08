@@ -139,3 +139,22 @@ div#data-error {
 div#routes_list>ul {
     padding-left: 0px;
 }
+
+ul#stops-list {
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+ul#stops-list img {
+    max-height: 0.8em;
+    padding-right: 10px;
+}
+
+ul#stops-list ul {
+    list-style-type: none;
+}
+
+.route_master-name {
+    font-weight: bold;
+    font-size: 19px;
+}

@@ -341,43 +341,58 @@ var displayRouteData = function(data, route) {
     // Un-hide stop list table header
     $("tr#stop_list_header").removeClass("hidden");
     // Clear data display before new display
-    $('#stops-list>table').find("tr:gt(0)").remove();
-    var stop_li;
+    $('#stops-list').find("li").remove();
+    var master_li;
     _.each(route.members, function(member) {
-        stop_tr = $("<tr>");
-        
         if(!member.role.match(/stop(_entry_only|_exit_only)?/))
             return;
-        stop_td = $("<td>")
-            .append($("<a>", {href: osmUrl + member.type + "/" + member.id,
-                              "data-osm": member.id})
-            .on("mouseenter", null, member, function(e) {
-                member.layer.openPopup();
-            })
-            .on("mouseleave", null, member, function(e) {
-                member.layer.closePopup();
-            })
-            .text(member.tags.name || "!Missing name!")
-            );
+        master_li = $("<li>");
+        stop_ul = $("<ul>");
+        if(member.stop_area) {
+            $("<a>", {href: osmUrl + "relation/" + member.stop_area.id})
+                .append($("<img>", {src: "img/relation.svg", alt: "stop_area relation"}))
+                .appendTo(master_li);
+            $("<span>").html(member.stop_area.tags.name || member.stop_area.id)
+                .addClass("route_master-name")
+                .appendTo(master_li);
+        } else {
+            $("<span>")
+                .text("Missing stop_area relation")
+                .addClass("route_master-name")
+                .appendTo(master_li);
+        }
+        stop_li = $("<li>");
+        $("<a>", {href: osmUrl + member.type + "/" + member.id, "data-osm": member.id})
+            .append($("<img>", {src: "img/stop_position_32.png", alt: "Stop_position"}))
+            .appendTo(stop_li);
         $("<span>")
             .text("♿")
             .addClass("wheelchair feature_" + member.tags.wheelchair)
-            .appendTo(stop_td);
-        stop_tr.append(stop_td)
-        if(member.stop_area)
-            stop_tr.append($("<td>").append($("<a>", {href: osmUrl + "relation/" + member.stop_area.id}).text(member.stop_area.tags.name || member.stop_area.id)));
+            .appendTo(stop_li);
+        $("<span>").html(member.tags.name || member.id)
+            .appendTo(stop_li);
+        stop_li.on("mouseenter", null, member, function(e) {
+            member.layer.openPopup();
+        })
+        .on("mouseleave", null, member, function(e) {
+            member.layer.closePopup();
+        });
+        stop_ul.append(stop_li);
 
         var platforms = findPlatform(data, route, member.stop_area);
-        var platform_ul = $("<ul>");
+        var platform_li = $("<li>");
         _.each(platforms, function(platform) {
             var platform_li = $("<li>");
             $("<a>", {href: osmUrl + platform.type + "/" + platform.id})
-            .text(platform.id) //TODO display name OR id
-            .appendTo(platform_li);
+                .append($("<img>", {src: "img/platform_14.png", alt: "Platform"}))
+                .appendTo(platform_li);
             $("<span>")
-            .text("♿")
-            .addClass("wheelchair feature_" + member.tags.wheelchair)
-            .appendTo(platform_li);
+                .text("♿")
+                .addClass("wheelchair feature_" + member.tags.wheelchair)
+                .appendTo(platform_li);
+            $("<span>")
+                .text(platform.tags.name || platform.id)
+                .appendTo(platform_li)
 
             platform_li.on("mouseenter", null, member, function(e) {
                 platform.layer.openPopup();
@@ -385,9 +400,9 @@ var displayRouteData = function(data, route) {
             .on("mouseleave", null, platform, function(e) {
                 platform.layer.closePopup();
             })
-            .appendTo(platform_ul);
+            .appendTo(stop_ul);
         });
-        var shelter_ul = $("<ul>");
+        /* var shelter_ul = $("<ul>");
         _.each(platforms, function(platform) {
             $("<li>")
             .text(platform.tags.shelter)
@@ -402,7 +417,9 @@ var displayRouteData = function(data, route) {
         $("<td>").append(platform_ul).appendTo(stop_tr);
         $("<td>").append(shelter_ul).appendTo(stop_tr);
         $("<td>").append(bench_ul).appendTo(stop_tr);
-        $('#stops-list>table').append(stop_tr);
+        */
+        master_li.append(stop_ul);
+        $('#stops-list').append(master_li);
     });
 }
 
