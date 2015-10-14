@@ -1,9 +1,9 @@
 var osmUrl = "//openstreetmap.org/";
 
 var path_color = {
-	bus: 'blue',
+	bus: 'green',
 	subway: 'red',
-	trolleybus: 'green',
+	trolleybus: 'yellow',
 	tramway: 'black',
 };
 var path_weight = 2;
@@ -288,7 +288,7 @@ function prepareMarker(obj, group, overrideStyle) {
         var latlngs = getLatLngArray(obj);
         if(obj.tags["public_transport"]=="platform") {
             obj.layer = L.polyline(latlngs,{
-                color: 'purple',
+                color: 'blue',
                 weight: 8
             }).bindPopup(popupHTML);
         }
