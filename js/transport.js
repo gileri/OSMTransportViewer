@@ -268,7 +268,7 @@ function displayOnMap(parsedData, route) {
 function getTagTable(obj) {
     var tagStr = "<table>";
     Object.keys(obj.tags).forEach(function(key) {
-        tagStr += `<tr><td>${key}</td><td>${obj.tags[key]}</td></tr>`;
+        tagStr += `<tr><td>${key}</td><td>${obj.tags[key].autoLink()}</td></tr>`;
     });
     tagStr += "</table>";
     return tagStr;
