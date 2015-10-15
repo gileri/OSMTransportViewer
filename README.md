@@ -7,8 +7,8 @@ An [OpenStreetMap](//openstreetmap.org) [Public Transport](//wiki.openstreetmap.
 
 
 1. Go to https://gileri.github.io/OSMTransportViewer
-2. Enter either the `network=\*`, `operator=\*` or both
-3. Enter the reference (`ref=\*`) of the wanted route 
+2. Enter either the `network=*`, `operator=*` or both
+3. Enter the reference (`ref=*`) of the wanted route 
 4. Click on Download
 5. Select a route variant in the sidebar
 
