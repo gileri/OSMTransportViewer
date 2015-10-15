@@ -312,7 +312,11 @@ function prepareMarker(obj, group, overrideStyle) {
 }
 
 function displayRoutes(parsed) {
-    // Clear data display before new display
+    //Display informations relative to the route_master chosen
+    var route_master = parsed.route_masters[Object.keys(parsed.route_masters)[0]]
+    $("#routemaster-tags").html(getTagTable(route_master));
+
+    // Clear data display before displaying new route variants
     $("#routes_list ul").empty()
 
     _.each(parsed.routes, function(r) {
