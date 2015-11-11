@@ -283,7 +283,7 @@ function getLatLngArray(osmWay) {
 }
 
 function prepareMarker(obj, group, overrideStyle) {
-    var popupHTML = `<h1>${obj.tags.name || "!Missing name!"}</h1>${getTagTable(obj)}`
+    var popupHTML = `<a href='${osmUrl}${obj.type}/${obj.id}'><h1>${obj.tags.name || "!Missing name!"}</h1></a>${getTagTable(obj)}`
     if(obj.type == "way") {
         var latlngs = getLatLngArray(obj);
         if(obj.tags["public_transport"]=="platform") {
