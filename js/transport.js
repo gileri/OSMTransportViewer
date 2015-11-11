@@ -1,4 +1,4 @@
-var osmUrl = "//openstreetmap.org/";
+var osmUrl = "//www.openstreetmap.org/";
 
 var path_color = {
 	bus: 'green',
