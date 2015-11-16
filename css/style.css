@@ -6,6 +6,7 @@ html, body {
 
 table {
     border-collapse: collapse;
+    word-break: break-word;
 }
 
 td {

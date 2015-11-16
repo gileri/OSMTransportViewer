@@ -100,6 +100,14 @@ function bindEvents () {
         }
         updateURLForm();
     });
+
+    $("#routemaster-tags-toggle").on("click", function() {
+        $("#routemaster-tags").toggle();
+    });
+
+    $("#route-tags-toggle").on("click", function() {
+        $("#route-tags").toggle();
+    });
 }
 
 function updateURLForm() {
@@ -314,6 +322,8 @@ function prepareMarker(obj, group, overrideStyle) {
 function displayRoutes(parsed) {
     //Display informations relative to the route_master chosen
     var route_master = parsed.route_masters[Object.keys(parsed.route_masters)[0]]
+    $("#routemaster-tags-toggle").removeClass("hidden");
+    $("#routemaster-name").text(route_master.tags.name);
     $("#routemaster-tags").html(getTagTable(route_master));
 
     // Clear data display before displaying new route variants
@@ -342,8 +352,10 @@ function displayRoutes(parsed) {
 };
 
 var displayRouteData = function(data, route) {
-    // Un-hide stop list table header
-    $("tr#stop_list_header").removeClass("hidden");
+    // Display route tags
+    $("#route-tags").html(getTagTable(route));
+    $("#route-tags-toggle").show();
+
     // Clear data display before new display
     $('#stops-list').find("li").remove();
     var master_li;
