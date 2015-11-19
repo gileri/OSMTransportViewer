@@ -129,9 +129,9 @@ ul#stops-list {
     padding-left: 0px;
 }
 
-ul#stops-list img {
+ul#stops-list img, div#routes_list ul>li img {
     max-height: 0.8em;
-    padding-right: 10px;
+    margin-right: 10px;
 }
 
 ul#stops-list ul {
