@@ -390,7 +390,7 @@ var displayRouteData = function(data, route) {
             .appendTo(stop_li);
         $("<span>").html(member.tags.name || member.id)
             .appendTo(stop_li);
-        stop_li.on("mouseenter", null, member, function(e) {
+        stop_li.on("click", null, member, function(e) {
             member.layer.openPopup();
         })
         .on("mouseleave", null, member, function(e) {
@@ -413,7 +413,7 @@ var displayRouteData = function(data, route) {
                 .text(platform.tags.name || platform.id)
                 .appendTo(platform_li)
 
-            platform_li.on("mouseenter", null, member, function(e) {
+            platform_li.on("click", null, member, function(e) {
                 platform.layer.openPopup();
             })
             .on("mouseleave", null, platform, function(e) {
