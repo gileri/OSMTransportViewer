@@ -291,6 +291,9 @@ function getLatLngArray(osmWay) {
 }
 
 function prepareMarker(obj, group, overrideStyle) {
+    markerOptions = {
+        autoPan: false
+    };
     var popupHTML = `<a href='${osmUrl}${obj.type}/${obj.id}'><h1>${obj.tags.name || "!Missing name!"}</h1></a>${getTagTable(obj)}`
     if(obj.type == "way") {
         var latlngs = getLatLngArray(obj);
@@ -298,22 +301,22 @@ function prepareMarker(obj, group, overrideStyle) {
             obj.layer = L.polyline(latlngs,{
                 color: 'blue',
                 weight: 8
-            }).bindPopup(popupHTML);
+            }).bindPopup(popupHTML, markerOptions);
         }
         else {
             obj.layer = L.polyline(latlngs,$.extend({
                 weight: 4
-            }, overrideStyle)).bindPopup(popupHTML);
+            }, overrideStyle)).bindPopup(popupHTML, markerOptions);
        }
     } else {
         if(obj.tags["public_transport"]=="stop_position") {
             obj.layer = L.marker([obj.lat, obj.lon], {
                 icon: iconStopPosition
             })
-            .bindPopup(popupHTML);
+            .bindPopup(popupHTML, markerOptions);
         } else {
             obj.layer = L.marker([obj.lat, obj.lon])
-            .bindPopup(popupHTML);
+            .bindPopup(popupHTML, markerOptions);
         }
     }
     group.addLayer(obj.layer);
