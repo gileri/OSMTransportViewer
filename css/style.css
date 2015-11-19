@@ -74,7 +74,7 @@ li[class*='_route'] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    list-style-position: inside;
+    list-style-type: none;
 }
 
 li[class*='_route']:hover {
@@ -85,23 +85,6 @@ li[class*='_route']>span:hover {
     cursor: pointer;
     text-decoration: underline;
 }
-
-li.bus_route, li.trolleybus_route {
-    list-style-image: url('../lib/osmic/bus-stop-14.png');
-}
-
-li.tram_route {
-    list-style-image: url('../lib/osmic/tram-stop-14.png');
-}
-
-li.subway_route {
-    list-style-image: url('../lib/osmic/metro-14.png');
-}
-
-li.railway_route {
-    list-style-image: url('../lib/osmic/railway-station-14.png');
-}
-
 .selected_route {
     font-weight: bold;
     white-space: normal;

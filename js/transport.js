@@ -22,6 +22,14 @@ var defaultOptions = {
 };
 var globalState = {};
 
+var route_icons = {
+    bus:        '/lib/osmic/bus-stop-14.png',
+    trolleybus: '/lib/osmic/bus-stop-14.png',
+    tram:       '/lib/osmic/tram-stop-14.png',
+    subway:      '/lib/osmic/metro-14.png',
+    railway:    '/lib/osmic/railway-station-14.png'
+}
+
 L.LatLngBounds.prototype.trim = function(precision) {
     this._northEast.lat = this._northEast.lat.toFixed(precision);
     this._northEast.lng = this._northEast.lng.toFixed(precision);
@@ -252,11 +260,13 @@ function getRouteMaster(id) {
     });
 }
 
-function displayOnMap(parsedData, route) {
+function clearMap() {
     if(map.hasLayer(routeLayer))
         map.removeLayer(routeLayer);
     routeLayer = L.layerGroup();
+}
 
+function displayOnMap(parsedData, route) {
     _.each(route.stop_positions, function(obj, index, parsedData) {
         prepareMarker(obj, routeLayer);
     });
@@ -334,6 +344,12 @@ function displayRoutes(parsed) {
 
     _.each(parsed.routes, function(r) {
         var routeLi = $("<li>").addClass(r.tags.route + "_route");
+
+        $("<a>", {href: osmUrl + "relation" + "/" + r.id})
+            .attr("target","_blank")
+            .append($("<img>", {src: route_icons[r.tags.route], alt: "route on osm.org"}))
+            .appendTo(routeLi);
+
         $("<span>")
             .text(" " + r.tags.name)
             .data("osmID", r.id)
@@ -342,13 +358,10 @@ function displayRoutes(parsed) {
                 $(this).addClass("selected_route");
                 updateURLForm();
                 displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
+                clearMap()
                 displayOnMap(parsed, parsed.routes[$(this).data("osmID")])
             })
             .appendTo(routeLi);
-        $("<a>", {href: osmUrl + "relation" + "/" + r.id})
-            .text("(↗)")
-            .attr("target","_blank")
-            .prependTo(routeLi);
 
         $("#routes_list>ul").append(routeLi);
     });
