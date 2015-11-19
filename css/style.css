@@ -159,3 +159,7 @@ ul#stops-list ul {
     font-weight: bold;
     font-size: 19px;
 }
+
+#routemaster-select {
+    max-width: 100%;
+}
