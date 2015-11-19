@@ -84,6 +84,8 @@ var parseOSM = function (data) {
                         r.stop_positions.push(m);
                     break;
                     case "platform":
+                    case "platform_entry_only":
+                    case "platform_exit_only":
                         r.platforms.push(m);
                     break;
                     case "":
