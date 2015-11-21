@@ -23,11 +23,11 @@ var defaultOptions = {
 var globalState = {};
 
 var route_icons = {
-    bus:        '/lib/osmic/bus-stop-14.png',
-    trolleybus: '/lib/osmic/bus-stop-14.png',
-    tram:       '/lib/osmic/tram-stop-14.png',
-    subway:      '/lib/osmic/metro-14.png',
-    railway:    '/lib/osmic/railway-station-14.png'
+    bus:        'lib/osmic/bus-stop-14.png',
+    trolleybus: 'lib/osmic/bus-stop-14.png',
+    tram:       'lib/osmic/tram-stop-14.png',
+    subway:     'lib/osmic/metro-14.png',
+    railway:    'lib/osmic/railway-station-14.png'
 }
 
 L.LatLngBounds.prototype.trim = function(precision) {
