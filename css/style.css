@@ -138,6 +138,10 @@ ul#stops-list ul {
     list-style-type: none;
 }
 
+ul#stops-list ul span{
+    cursor: pointer;
+}
+
 .route_master-name {
     font-weight: bold;
     font-size: 19px;
