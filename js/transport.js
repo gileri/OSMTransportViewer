@@ -213,14 +213,15 @@ function getRouteMaster(id) {
     'relation["type"="route_master"](' + id + ')->.route_masters;' +
     'rel(r.route_masters)->.routes;' +
     'node(r.routes)->.stops;' +
-    '(' +
-      'way(r.routes)["highway"];' +
-      'way(r.routes)["railway"];' +
-    ')->.paths;' +
+    'way(r.routes)[~"(high|rail)way"~"."]->.paths;' +
     'node(w.paths)->.paths_nodes;' +
     '(' +
       'node(r.routes:"platform");' +
-      'way (r.routes:"platform");' +
+      'node(r.routes:"platform_entry_only");' +
+      'node(r.routes:"platform_exit_only");' +
+      'way (r.routes:"platform_entry_only");' +
+      'way (r.routes:"platform_entry_only");' +
+      'way (r.routes:"platform_exit_only");' +
     ');' +
     '(._;>;)->.platforms;' +
     '(' +
