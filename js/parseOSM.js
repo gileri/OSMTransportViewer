@@ -1,4 +1,4 @@
-var haveTag = function(obj, key, value) {
+function haveTag(obj, key, value) {
     if (!obj || ! obj.tags)
         return false;
     if(!value)
@@ -7,7 +7,7 @@ var haveTag = function(obj, key, value) {
 }
 
 
-var parseOSM = function (data) {
+function parseOSM (data) {
     var nodes = {}
     var ways = {}
     var rels = {}
@@ -17,6 +17,8 @@ var parseOSM = function (data) {
     var stop_areas = {}
     var routes = {}
     var route_masters = {}
+
+    // Add all features to nodes/way/rels according to their type
     data.elements.forEach(function(e) {
        switch(e.type) {
            case "node":
@@ -31,17 +33,21 @@ var parseOSM = function (data) {
        }
     });
 
+
+    // Attach nodes to their parent ways
     _.each(ways, function(w) {
         newMembers = [];
         w.nodes.forEach(function(m) {
                 newMembers.push(nodes[m]);
         });
         w.nodes = newMembers;
+        
         if (haveTag(w, 'public_transport', 'platform')) {
             platforms[w.id] = w;
         }
     });
 
+    // Attach relation members to their parent relations
     _.each(rels, function(r) {
         newMembers = [];
         _.each(r.members, function(m) {
@@ -63,11 +69,11 @@ var parseOSM = function (data) {
             }
         });
         r.members = newMembers;
+
         if(haveTag(r, 'type', 'public_transport')
         && haveTag(r, 'public_transport', 'stop_area')) {
             stop_areas[r.id] = r;
             _.each(r.members, function(member) {
-                // TODO Reference Stop_area into member nodes
                 member.stop_area = r;
             });
         }
@@ -101,17 +107,14 @@ var parseOSM = function (data) {
         }
     });
 
-    for (var n in nodes) {
-        if (!nodes.hasOwnProperty(n)) {
-            continue;
-        }
+    _.each(nodes, function(n) {
         if(haveTag(nodes[n], 'public_transport', 'stop_position')) {
             stop_positions[nodes[n].id] = nodes[n];
         }
         else if (haveTag(nodes[n], 'public_transport', 'platform')) {
             platforms[nodes[n].id] = nodes[n];
         }
-    }
+    });
 
     return {
         'nodes': nodes,

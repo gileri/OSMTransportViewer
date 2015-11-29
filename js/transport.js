@@ -6,7 +6,6 @@ var path_color = {
 	trolleybus: 'yellow',
 	tramway: 'black',
 };
-var path_weight = 2;
 
 var iconStopPosition = L.icon({
     iconUrl: './img/stop_position_32.png',
@@ -77,7 +76,7 @@ function bindEvents () {
                 delete globalState[$(this).attr("name")];
             }
         });
-        updateURLForm();
+        updateURL();
         getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     });
@@ -93,7 +92,7 @@ function bindEvents () {
         if($("#bb-check").prop("checked")) {
             globalState.bb = map.getBounds().trim(5).toXobbString();
         }
-        updateURLForm();
+        updateURL();
     });
 
     $(".otv-settings").on('change', function(e) {
@@ -106,26 +105,21 @@ function bindEvents () {
         } else {
             delete globalState.bb;
         }
-        updateURLForm();
+        updateURL();
     });
 
     $("#routemaster-tags-toggle").on("click", function() {
         $("#routemaster-tags").toggle();
     });
-
     $("#route-tags-toggle").on("click", function() {
         $("#route-tags").toggle();
     });
 }
 
-function updateURLForm() {
+function updateURL() {
     var uri = URI();
     uri.search(globalState);
     history.pushState({globalState: globalState}, null, uri.toString());
-
-    //$("#dlForm input.[type='text']").each(function() {
-    //    $(this).val(globalState[$(this).attr("name")]);
-    //})
 }
 
 function guessQuery() {
@@ -136,12 +130,12 @@ function guessQuery() {
         getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     } else {
-        sidebar.open("query"); // Ask parameters
+        sidebar.open("query"); // Ask parameters to user
     }
 }
 
 function dlRouteMasters(query) {
-    updateURLForm();
+    updateURL();
     $("#data-error").empty();
     $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
@@ -210,7 +204,7 @@ function displayRouteMasters(data) {
 
 function getRouteMaster(id) {
     $("#routemaster-dl").prop('disabled', true);
-    updateURLForm();
+    updateURL();
     $("li#data_tab").removeClass("disabled");
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
     sidebar.open("data_display");
@@ -356,10 +350,10 @@ function displayRoutes(parsed) {
             .on("click", function(event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
                 $(this).addClass("selected_route");
-                updateURLForm();
+                updateURL();
                 displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
-                clearMap()
-                displayOnMap(parsed, parsed.routes[$(this).data("osmID")])
+                clearMap();
+                displayOnMap(parsed, parsed.routes[$(this).data("osmID")]);
             })
             .appendTo(routeLi);
 
@@ -434,22 +428,6 @@ var displayRouteData = function(data, route) {
             })
             .appendTo(stop_ul);
         });
-        /* var shelter_ul = $("<ul>");
-        _.each(platforms, function(platform) {
-            $("<li>")
-            .text(platform.tags.shelter)
-            .appendTo(shelter_ul);
-        });
-        var bench_ul = $("<ul>");
-        _.each(platforms, function(platform) {
-            $("<li>")
-            .text(platform.tags.bench)
-            .appendTo(bench_ul);
-        });
-        $("<td>").append(platform_ul).appendTo(stop_tr);
-        $("<td>").append(shelter_ul).appendTo(stop_tr);
-        $("<td>").append(bench_ul).appendTo(stop_tr);
-        */
         master_li.append(stop_ul);
         $('#stops-list').append(master_li);
     });
