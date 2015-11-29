@@ -245,7 +245,8 @@ function getRouteMaster(id) {
         type: "POST",
         data: query,
     }).done(function (op_data) {
-        displayRoutes(parseOSM(op_data));
+        parsed = parseOSM(op_data)
+        displayRoutes(parsed.route_masters[Object.keys(parsed.route_masters)[0]], parsed);
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
     }).fail(function (op_data) {
         $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
@@ -327,9 +328,9 @@ function prepareMarker(obj, group, overrideStyle) {
     group.addLayer(obj.layer);
 }
 
-function displayRoutes(parsed) {
+function displayRoutes(route_master, parsed) {
     //Display informations relative to the route_master chosen
-    var route_master = parsed.route_masters[Object.keys(parsed.route_masters)[0]]
+
     $("#routemaster-tags-toggle").removeClass("hidden");
     $("#routemaster-name").text(route_master.tags.name);
     $("#routemaster-tags").html(getTagTable(route_master));
