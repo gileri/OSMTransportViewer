@@ -438,8 +438,9 @@ var displayRouteData = function(data, route) {
 function findPlatform(data, route, stop_area) {
 	if(!stop_area)
 		return [];
-    var route_platforms = _.filter(route.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
-    var area_platforms = _.filter(stop_area.members, function(p){return p.role.match(/platform(_entry_only|_exit_only)?/)});
+    platform_regex = new RegExp("platform(_entry_only|_exit_only)?");
+    var route_platforms = _.filter(route.members, function(p){return platform_regex.test(p.role)});
+    var area_platforms = _.filter(stop_area.members, function(p){return platform_regex.test(p.role)});
     return _.intersection(route_platforms, area_platforms);
 }
 
