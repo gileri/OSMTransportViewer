@@ -165,9 +165,9 @@ function dlRouteMasters(query) {
 function getRouteMasters(net, op, ref, bbox) {
     $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
 
-	var netstr = net  ? ("[network~'" + net + "',i]") : "";
-	var opstr =  op   ? ("[operator~'" + op + "',i]") : "";
-	var refstr = ref  ? ("[ref~'^" + ref + "$',i]")   : "";
+	var netstr = net ? ("[network~'" + net + "',i]") : "";
+	var opstr =  op  ? ("[operator~'" + op + "',i]") : "";
+	var refstr = ref ? ("[ref~'^" + ref + "$',i]")   : "";
 
     if(bbox) {
         var bbox =   bbox ? ("(" + bbox + ")") : "";
