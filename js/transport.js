@@ -19,6 +19,8 @@ var mapPadding = {
 var defaultOptions = {
     "opapi": "//overpass-api.de/api"
 };
+
+var parsed;
 var globalState = {};
 
 var route_icons = {
@@ -77,7 +79,7 @@ function bindEvents () {
             }
         });
         updateURL();
-        getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
+        getRouteMastersByParams(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     });
 
@@ -114,6 +116,32 @@ function bindEvents () {
     $("#route-tags-toggle").on("click", function() {
         $("#route-tags").toggle();
     });
+
+    $("#routemaster-displayAll").on("click", displayAllOnMap);
+}
+
+function updateStatus(s, msg) {
+    $("li#data_tab i").removeClass().addClass("fa");
+    switch(s) {
+        case "ok":
+            $("li#data_tab i").addClass("fa-bars");
+            $("li#data_tab").removeClass("disabled")
+            break;
+        case "dl":
+            $("li#data_tab i").addClass("fa-spin fa-spinner");
+            break;
+        case "fail":
+            $("li#data_tab i").addClass("fa-exclamation-triangle");
+            break;
+        default:
+            break;
+    }
+
+    if(msg) {
+        $("#data-error").text(msg);
+    } else {
+        $("#data-error").empty();
+    }
 }
 
 function updateURL() {
@@ -123,47 +151,19 @@ function updateURL() {
 }
 
 function guessQuery() {
-    if(globalState.id) {
-        getRouteMaster(globalState.id);
+    if(globalState.rmid) {
+        getRouteMasterById(globalState.rmid);
         sidebar.open("data_display");
     } else if (globalState.rmid || globalState.network || globalState.operator || globalState.bb) { // Avoid queries which can match too much routes
-        getRouteMasters(globalState.network, globalState.operator, globalState.ref, globalState.bb);
+        getRouteMastersByParams(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     } else {
         sidebar.open("query"); // Ask parameters to user
     }
 }
 
-function dlRouteMasters(query) {
-    updateURL();
-    $("#data-error").empty();
-    $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
-        type: "POST",
-        data: query,
-    }).done(function (op_data, a, b) {
-        $("li#data_tab i").removeClass("fa-spin fa-spinner");
-        $("li#data_tab").removeClass("disabled")
-        if(op_data.elements.length === 0) {
-            $("#data-error").html('No route_master found');
-            $("li#data_tab i").addClass("fa-exclamation-triangle");
-        } else {
-            displayRouteMasters(op_data);
-            $("li#data_tab i").addClass("fa-bars");
-        }
-    }).fail(function (op_data, error, exception) {
-        $("#data-error").html(error);
-        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
-    }).always(function () {
-        $("#dlForm>input[type=submit]").prop("disabled", false);
-        if(globalState.rmid) {
-            $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
-            getRouteMaster(globalState.rmid);
-        }
-    });
-}
-
 function getRouteMasters(net, op, ref, bbox) {
-    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
+    updateStatus("dl");
 
 	var netstr = net ? ("[network~'" + net + "',i]") : "";
 	var opstr =  op  ? ("[operator~'" + op + "',i]") : "";
@@ -183,8 +183,9 @@ function getRouteMasters(net, op, ref, bbox) {
     dlRouteMasters(query);
 }
 
-function displayRouteMasters(data) {
-    var sorted = _.sortBy(data.elements, function(e) {return e.tags.name});
+function displayRouteMasters() {
+    updateStatus("ok");
+    var sorted = _.sortBy(parsed.route_masters, function(e) {return e.tags.name});
     $("#routemaster-select").empty();
     $.each(sorted, function(i, r) {
         $("#routemaster-select").append($('<option>', {
@@ -196,21 +197,38 @@ function displayRouteMasters(data) {
     $("#routemaster-dl")
         .click(function() {
             var masterId = $("#routemaster-select option:selected").val();
+            $("#routemaster-dl").prop('disabled', true);
+            updateURL();
+            $("li#data_tab").removeClass("disabled");
+            updateStatus("dl");
+            sidebar.open("data_display");
             globalState.rmid = masterId;
-            getRouteMaster(globalState.rmid);
+
+            getRouteMasterById(globalState.rmid, 
+                function (route_master) {
+                    if(!route_master) {
+                        updateStatus("fail", "No route_master found");
+                    } else {
+                        updateStatus("ok");
+                        displayRoutes(route_master);
+                    }
+                }, function() {
+                    updateStatus("fail", "No route_master found");
+                },
+                function() {
+                    if(globalState.rmid) {
+                        $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
+                        getRouteMaster(globalState.rmid);
+                    }
+                });
         })
         .removeClass("hidden");
+        $("#routemaster-displayAll").removeClass("hidden");
 }
 
-function getRouteMaster(id) {
-    $("#routemaster-dl").prop('disabled', true);
-    updateURL();
-    $("li#data_tab").removeClass("disabled");
-    $("li#data_tab i").removeClass().addClass("fa fa-spinner fa-spin");
-    sidebar.open("data_display");
-
+function getRouteMastersData(base, done, fail, always) {
     query='[out:json];' +
-    'relation["type"="route_master"](' + id + ')->.route_masters;' +
+    base + '->.route_masters;' +
     'rel(r.route_masters)->.routes;' +
     'node(r.routes)->.stops;' +
     'way(r.routes)[~"(high|rail)way"~"."]->.paths;' +
@@ -219,7 +237,7 @@ function getRouteMaster(id) {
       'node(r.routes:"platform");' +
       'node(r.routes:"platform_entry_only");' +
       'node(r.routes:"platform_exit_only");' +
-      'way (r.routes:"platform_entry_only");' +
+      'way (r.routes:"platform");' +
       'way (r.routes:"platform_entry_only");' +
       'way (r.routes:"platform_exit_only");' +
     ');' +
@@ -244,16 +262,40 @@ function getRouteMaster(id) {
     $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
         type: "POST",
         data: query,
-    }).done(function (op_data) {
-        parsed = parseOSM(op_data)
-        displayRoutes(parsed.route_masters[Object.keys(parsed.route_masters)[0]], parsed);
-        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-bars");
-    }).fail(function (op_data) {
-        $("li#data_tab i").removeClass("fa-spin fa-spinner").addClass("fa-exclamation-triangle");
-    }).always(function () {
-        $("#dlForm>input[type=submit]").prop("disabled", false);
-        $("#routemaster-dl").prop('disabled', false);
-    });
+    }).done(function (data) {
+        parsed = parseOSM(data);
+        done();
+    }).fail(fail)
+      .always(always);
+}
+
+function getRouteMastersByParams(network, operator, ref, bbox) {
+    updateStatus("dl");
+
+	var netstr = network  ? ("[network~'" + network + "',i]") : "";
+	var opstr =  operator ? ("[operator~'" + operator + "',i]") : "";
+	var refstr = ref      ? ("[ref~'^" + ref + "$',i]")   : "";
+
+    if(bbox) {
+        var bbox =   bbox ? ("(" + bbox + ")") : "";
+        var base = 'relation["type"="route"]' + bbox + ";" +
+        'relation(br)' + netstr + opstr + refstr
+    } else {
+        var base = 'relation["type"="route_master"]' + netstr + opstr + refstr;
+    }
+    getRouteMastersData(base, displayRouteMasters);
+}
+
+function getRouteMasterById(id, done, fail, always) {
+    if(parsed && parsed.route_masters[id]) {
+        done(parsed.route_masters[id]);
+    } else {
+        var base = 'relation["type"="route_master"](' + id + ')';
+        updateStatus("dl");
+        getRouteMastersData(base, displayRouteMasters, function() {
+            updateStatus("fail");
+        });
+    }
 }
 
 function clearMap() {
@@ -262,14 +304,14 @@ function clearMap() {
     routeLayer = L.layerGroup();
 }
 
-function displayOnMap(parsedData, route) {
-    _.each(route.stop_positions, function(obj, index, parsedData) {
+function displayOnMap(route) {
+    _.each(route.stop_positions, function(obj, index, parsed) {
         prepareMarker(obj, routeLayer);
     });
-    _.each(route.platforms, function(obj, index, parsedData) {
+    _.each(route.platforms, function(obj, index, parsed) {
         prepareMarker(obj, routeLayer);
     });
-    _.each(route.paths, function(obj, index, parsedData) {
+    _.each(route.paths, function(obj, index, parsed) {
         prepareMarker(obj, routeLayer, {
             color: path_color[route.tags.route] || "red",
 
@@ -328,17 +370,18 @@ function prepareMarker(obj, group, overrideStyle) {
     group.addLayer(obj.layer);
 }
 
-function displayRoutes(route_master, parsed) {
+function displayRoutes(route_master) {
     //Display informations relative to the route_master chosen
 
     $("#routemaster-tags-toggle").removeClass("hidden");
+    $("#routemaster-dl").attr("disabled", false);
     $("#routemaster-name").text(route_master.tags.name);
     $("#routemaster-tags").html(getTagTable(route_master));
 
     // Clear data display before displaying new route variants
     $("#routes_list ul").empty()
 
-    _.each(parsed.routes, function(r) {
+    _.each(route_master.members, function(r) {
         var routeLi = $("<li>").addClass(r.tags.route + "_route");
 
         $("<a>", {href: osmUrl + "relation" + "/" + r.id})
@@ -355,13 +398,18 @@ function displayRoutes(route_master, parsed) {
                 updateURL();
                 displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
                 clearMap();
-                displayOnMap(parsed, parsed.routes[$(this).data("osmID")]);
+                displayOnMap(parsed.routes[$(this).data("osmID")]);
             })
             .appendTo(routeLi);
 
         $("#routes_list>ul").append(routeLi);
     });
 };
+
+function displayAllOnMap() {
+    clearMap();
+    _.each(parsed.routes, displayOnMap);
+}
 
 var displayRouteData = function(data, route) {
     // Display route tags
@@ -458,6 +506,7 @@ function initOptions() {
 
 function populateOptionsInputs() {
     var filteredLocalStorage = _.filter(localStorage, function(i){
+        //Return only "real" properties
         return i.lastIndexOf(i, 0);
     });
     for (o in filteredLocalStorage) {
