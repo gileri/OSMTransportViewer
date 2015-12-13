@@ -148,6 +148,9 @@ function updateURL() {
     var uri = URI();
     uri.search(globalState);
     history.pushState({globalState: globalState}, null, uri.toString());
+    $("#dlForm input[type='text']").each(function() {
+        $(this).val(globalState[$(this).attr("name")]);
+    })
 }
 
 function guessQuery() {
@@ -160,6 +163,7 @@ function guessQuery() {
     } else {
         sidebar.open("query"); // Ask parameters to user
     }
+    updateURL();
 }
 
 function getRouteMasters(net, op, ref, bbox) {
