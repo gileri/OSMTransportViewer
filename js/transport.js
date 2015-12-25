@@ -107,7 +107,6 @@ function bindEvents () {
         } else {
             delete globalState.bb;
         }
-        updateURL();
     });
 
     $("#routemaster-tags-toggle").on("click", function() {
