@@ -119,17 +119,19 @@ function bindEvents () {
     $("#routemaster-displayAll").on("click", displayAllOnMap);
 }
 
-function updateStatus(s, msg) {
+function updateStatus(status, msg) {
     $("li#data_tab i").removeClass().addClass("fa");
-    switch(s) {
+    switch(status) {
         case "ok":
             $("li#data_tab i").addClass("fa-bars");
             $("li#data_tab").removeClass("disabled")
             break;
         case "dl":
             $("li#data_tab i").addClass("fa-spin fa-spinner");
+            $("li#data_tab").addClass("disabled")
             break;
         case "fail":
+            $("li#data_tab").removeClass("disabled")
             $("li#data_tab i").addClass("fa-exclamation-triangle");
             break;
         default:
