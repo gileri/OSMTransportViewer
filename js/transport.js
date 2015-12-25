@@ -189,7 +189,11 @@ function getRouteMasters(net, op, ref, bbox) {
 }
 
 function displayRouteMasters() {
-    updateStatus("ok");
+	if(parsed.route_masters.length) {
+		updateStatus("ok");
+	} else {
+        updateStatus("fail", "No route_masters found");
+	}
     var sorted = _.sortBy(parsed.route_masters, function(e) {return e.tags.name});
     $("#routemaster-select").empty();
     $.each(sorted, function(i, r) {
