@@ -189,7 +189,7 @@ function getRouteMasters(net, op, ref, bbox) {
 }
 
 function displayRouteMasters() {
-	if(parsed.route_masters.length) {
+	if(Object.keys(parsed.route_masters).length) {
 		updateStatus("ok");
 	} else {
         updateStatus("fail", "No route_masters found");
