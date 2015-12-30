@@ -162,7 +162,7 @@ function guessQuery() {
         getRouteMastersByParams(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     } else {
-        sidebar.open("query"); // Ask parameters to user
+        sidebar.open("info-tab");
     }
     updateURL();
 }
