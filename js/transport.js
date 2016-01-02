@@ -190,28 +190,6 @@ function guessQuery() {
     updateURL();
 }
 
-function getRouteMasters(net, op, ref, bbox) {
-    updateStatus("dl");
-
-    var netstr = net ? ("[network~'" + net + "',i]") : "",
-        opstr =  op  ? ("[operator~'" + op + "',i]") : "",
-        refstr = ref ? ("[ref~'^" + ref + "$',i]")   : "",
-        query;
-
-    if (bbox) {
-        bbox =   bbox ? ("(" + bbox + ")") : "";
-        query = '[out:json];' +
-        'relation["type"="route"]' + bbox + ";" +
-        'relation(br)' + netstr + opstr + refstr + ';' +
-        'out body;';
-    } else {
-        query = '[out:json];' +
-        'relation["type"="route_master"]' + netstr + opstr + refstr + ';' +
-        'out body;';
-    }
-    dlRouteMasters(query);
-}
-
 function displayRouteMasters() {
     if (!Object.keys(parsed.route_masters).length) {
         updateStatus("fail", "No route_masters found");
