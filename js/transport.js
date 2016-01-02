@@ -376,19 +376,27 @@ function displayRoutes(route_master) {
 
         $("<span>")
             .text(" " + r.tags.name)
-            .data("osmID", r.id)
+            .attr("data-osmid", r.id)
             .on("click", function (event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
                 $(this).addClass("selected_route");
                 updateURL();
-                displayRouteData(parsed, parsed.routes[$(this).data("osmID")]);
+                displayRouteData(parsed.routes[$(this).data("osmid")]);
                 clearMap();
-                displayOnMap(parsed.routes[$(this).data("osmID")]);
+                displayOnMap(parsed.routes[$(this).data("osmid")]);
             })
             .appendTo(routeLi);
 
         $("#routes_list>ul").append(routeLi);
     });
+    // Display the first route variant if it exists
+    if(route_master.members[0]) {
+        var id = route_master.members[0].id;
+        $(`span[data-osmID=${id}]`).addClass("selected_route");
+        clearMap();
+        displayRouteData(parsed.routes[id]);
+        displayOnMap(parsed.routes[id]);
+    }
 }
 
 function displayAllOnMap() {
@@ -396,7 +404,7 @@ function displayAllOnMap() {
     _.each(parsed.routes, displayOnMap);
 }
 
-function displayRouteData(data, route) {
+function displayRouteData(route) {
     // Display route tags
     $("#route-tags").html(getTagTable(route));
     $("#route-tags-toggle").show();
@@ -441,7 +449,7 @@ function displayRouteData(data, route) {
         });
         stop_ul.append(stop_li);
 
-        var platforms = findPlatform(data, route, member.stop_area);
+        var platforms = findPlatform(route, member.stop_area);
         _.each(platforms, function (platform) {
             var platform_li = $("<li>");
             $("<a>", {href: osmUrl + platform.type + "/" + platform.id})
@@ -468,7 +476,7 @@ function displayRouteData(data, route) {
     });
 }
 
-function findPlatform(data, route, stop_area) {
+function findPlatform(route, stop_area) {
 	if (!stop_area) {
 		return [];
     }
