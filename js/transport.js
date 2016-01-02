@@ -205,9 +205,8 @@ function displayRouteMasters() {
             text: r.tags.name || r.id,
         }));
     });
-    if (Object.keys(parsed.route_masters).length === 1) {
-        $("#routemaster-select").change();
-    }
+    // Always trigger route variant display
+    $("#routemaster-select").change();
 }
 
 function getRouteMastersData(base, done, fail, always) {
