@@ -117,6 +117,27 @@ function bindEvents () {
     });
 
     $("#routemaster-displayAll").on("click", displayAllOnMap);
+
+    $("#routemaster-select")
+        .removeClass("hidden")
+        .change(function() {
+            var masterId = $(this).val();
+            updateStatus("dl");
+            globalState.rmid = masterId;
+            $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
+            updateURL();
+            getRouteMasterById(globalState.rmid,
+                function (route_master) {
+                    if(!route_master) {
+                        updateStatus("fail", "No route_master found");
+                    } else {
+                        updateStatus("ok");
+                        displayRoutes(route_master);
+                    }
+                }, function() {
+                    updateStatus("fail", "No route_master found");
+                });
+        });
 }
 
 function updateStatus(status, msg) {
@@ -189,11 +210,12 @@ function getRouteMasters(net, op, ref, bbox) {
 }
 
 function displayRouteMasters() {
-	if(Object.keys(parsed.route_masters).length) {
-		updateStatus("ok");
-	} else {
+	if(!Object.keys(parsed.route_masters).length) {
         updateStatus("fail", "No route_masters found");
-	}
+        return;
+    }
+    updateStatus("ok");
+    $("#routemaster-displayAll").removeClass("hidden");
     var sorted = _.sortBy(parsed.route_masters, function(e) {return e.tags.name});
     $("#routemaster-select").empty();
     $.each(sorted, function(i, r) {
@@ -202,37 +224,9 @@ function displayRouteMasters() {
             text: r.tags.name || r.id,
         }));
     });
-    $("#routemaster-select").removeClass("hidden");
-    $("#routemaster-dl")
-        .click(function() {
-            var masterId = $("#routemaster-select option:selected").val();
-            $("#routemaster-dl").prop('disabled', true);
-            updateURL();
-            $("li#data_tab").removeClass("disabled");
-            updateStatus("dl");
-            sidebar.open("data_display");
-            globalState.rmid = masterId;
-
-            getRouteMasterById(globalState.rmid, 
-                function (route_master) {
-                    if(!route_master) {
-                        updateStatus("fail", "No route_master found");
-                    } else {
-                        updateStatus("ok");
-                        displayRoutes(route_master);
-                    }
-                }, function() {
-                    updateStatus("fail", "No route_master found");
-                },
-                function() {
-                    if(globalState.rmid) {
-                        $("#routemaster-select option[value=" + globalState.rmid +"]").prop('selected', 'true');
-                        getRouteMaster(globalState.rmid);
-                    }
-                });
-        })
-        .removeClass("hidden");
-        $("#routemaster-displayAll").removeClass("hidden");
+    if(Object.keys(parsed.route_masters).length == 1) {
+        $("#routemaster-select").change();
+    }
 }
 
 function getRouteMastersData(base, done, fail, always) {
@@ -383,7 +377,6 @@ function displayRoutes(route_master) {
     //Display informations relative to the route_master chosen
 
     $("#routemaster-tags-toggle").removeClass("hidden");
-    $("#routemaster-dl").attr("disabled", false);
     $("#routemaster-name").text(route_master.tags.name);
     $("#routemaster-tags").html(getTagTable(route_master));
 
