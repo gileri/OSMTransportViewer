@@ -491,16 +491,6 @@ function initOptions() {
     });
 }
 
-function populateOptionsInputs() {
-    var filteredLocalStorage = _.filter(localStorage, function (i){
-        //Return only "real" properties
-        return i.lastIndexOf(i, 0);
-    });
-    for (var o in filteredLocalStorage) {
-        $("#" + o).value(localStorage.getItem(o));
-    }
-}
-
 initOptions();
 bindEvents();
 guessQuery();
