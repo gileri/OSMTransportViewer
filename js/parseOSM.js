@@ -1,26 +1,28 @@
 function haveTag(obj, key, value) {
-    if (!obj || ! obj.tags)
+    if (!obj || ! obj.tags) {
         return false;
-    if(!value)
+    }
+    if(!value) {
         return (key in obj.tags);
+    }
     return (obj.tags[key] == value);
 }
 
-
 function parseOSM (data, previous) {
+    var d;
     if(previous !== undefined) {
-        var d = previous;
+        d = previous;
     } else {
-        var d = {}
-        d.nodes = {}
-        d.ways = {}
-        d.rels = {}
+        d = {};
+        d.nodes = {};
+        d.ways = {};
+        d.rels = {};
 
-        d.stop_positions = {}
-        d.platforms = {}
-        d.stop_areas = {}
-        d.routes = {}
-        d.route_masters = {}
+        d.stop_positions = {};
+        d.platforms = {};
+        d.stop_areas = {};
+        d.routes = {};
+        d.route_masters = {};
     }
 
     // Add all features to nodes/way/rels according to their type
@@ -75,8 +77,8 @@ function parseOSM (data, previous) {
         });
         r.members = newMembers;
 
-        if(haveTag(r, 'type', 'public_transport')
-        && haveTag(r, 'public_transport', 'stop_area')) {
+        if(haveTag(r, 'type', 'public_transport') &&
+           haveTag(r, 'public_transport', 'stop_area')) {
             d.stop_areas[r.id] = r;
             _.each(r.members, function(member) {
                 member.stop_area = r;
