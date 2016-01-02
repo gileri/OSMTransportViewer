@@ -365,6 +365,7 @@ function displayRoutes(route_master) {
 
     // Clear data display before displaying new route variants
     $("#routes_list ul").empty();
+    $('#stops-list').find("li").remove();
 
     _.each(route_master.members, function (r) {
         var routeLi = $("<li>").addClass(r.tags.route + "_route");
