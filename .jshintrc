@@ -1,0 +1,14 @@
+{
+    "esnext": true,
+    "curly": true,
+    "forin": true,
+    "futurehostile": true,
+    //"latedef": true,
+    //"undef": true,
+    "maxdepth": 3,
+    "nonbsp": true,
+    "notypeof": true,
+    "shadow": true,
+    "notypeof": true,
+    "unused": true
+}
