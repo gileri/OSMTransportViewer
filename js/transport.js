@@ -376,7 +376,8 @@ function displayRoutes(route_master) {
             .appendTo(routeLi);
 
         $("<span>")
-            .text(" " + r.tags.name)
+            .text(r.tags.name)
+            .prop("title", r.tags.name)
             .attr("data-osmid", r.id)
             .on("click", function (event) {
                 $("#routes_list>ul>li>span").removeClass("selected_route");

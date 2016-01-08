@@ -77,17 +77,13 @@ li[class*='_route'] {
     list-style-type: none;
 }
 
-li[class*='_route']:hover {
-    white-space: normal;
-}
-
 li[class*='_route']>span:hover {
     cursor: pointer;
     text-decoration: underline;
 }
+
 .selected_route {
     font-weight: bold;
-    white-space: normal;
 }
 
 #dlForm {
