@@ -133,12 +133,11 @@ function bindEvents() {
     $("#routemaster-select")
         .removeClass("hidden")
         .change(function () {
-            var masterId = $(this).val();
+            globalState.selrm = $(this).val();
+            $("#routemaster-select").val(globalState.selrm);
             updateStatus("dl");
-            globalState.rmid = masterId;
-            $("#routemaster-select option[value=" + globalState.rmid + "]").prop('selected', 'true');
             updateURL();
-            getRouteMasterById(globalState.rmid,
+            getRouteMasterById(globalState.selrm,
                 function (route_master) {
                     if (!route_master) {
                         updateStatus("fail", "No route_master found");
@@ -210,6 +209,9 @@ function displayRouteMasters() {
         }));
     });
     // Always trigger route variant display
+    if(globalState.selrm) {
+        $("#routemaster-select").val(globalState.selrm);
+    }
     $("#routemaster-select").change();
 }
 
