@@ -19,7 +19,8 @@ var mapPadding = {
 };
 
 var defaultOptions = {
-    "opapi": "//overpass-api.de/api"
+    "otv-opapi": "//overpass-api.de/api",
+    "otv-read_intro": false,
 };
 
 var parsed;
@@ -490,9 +491,8 @@ function findPlatform(route, stop_area) {
 
 function initOptions() {
     for (var o in defaultOptions) {
-        if (!localStorage.getItem("otv-" + o)) {
-            // Add a prefix to localStored options to avoid conflicts
-            localStorage.setItem("otv-" + o, defaultOptions[o]);
+        if (!localStorage.getItem(o)) {
+            localStorage.setItem(o, defaultOptions[o]);
         }
     }
     $(".otv-settings").each(function () {
