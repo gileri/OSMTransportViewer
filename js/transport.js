@@ -185,8 +185,11 @@ function guessQuery() {
     } else if (globalState.rmid || globalState.network || globalState.operator || globalState.bb) { // Avoid queries which can match too much routes
         getRouteMastersByParams(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
-    } else {
+    } else if (! localStorage.getItem("otv-readIntro")){
+        localStorage.setItem("otv-readIntro", true);
         sidebar.open("info-tab");
+    } else {
+        sidebar.open("query");
     }
     updateURL();
 }
