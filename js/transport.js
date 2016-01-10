@@ -150,7 +150,7 @@ function bindEvents() {
                         displayRoutes(route_master);
                     }
                 }, function () {
-                    updateStatus("fail", "No route_master found");
+                    updateStatus("fail", "Error while getting route_master data");
                 });
         });
 }
@@ -295,12 +295,11 @@ function getRouteMastersByParams(network, operator, ref, bbox) {
 function getRouteMasterById(id, done, fail, always) {
     if (parsed && parsed.route_masters[id]) {
         done(parsed.route_masters[id]);
+        always();
     } else {
         var base = 'relation["type"="route_master"](' + id + ')';
         updateStatus("dl");
-        getRouteMastersData(base, displayRouteMasters, function () {
-            updateStatus("fail");
-        });
+        getRouteMastersData(base, done, fail, always);
     }
 }
 
