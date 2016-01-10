@@ -1,3 +1,5 @@
+/*global parseOSM*/
+
 function haveTag(obj, key, value) {
     if (!obj || ! obj.tags) {
         return false;
@@ -30,6 +32,7 @@ function parseOSM (data, previous) {
        switch(e.type) {
            case "node":
            d.nodes[e.id] = e;
+           d.nodes[e.id].ways = [];
        break;
        case "way":
            d.ways[e.id] = e;
@@ -41,11 +44,12 @@ function parseOSM (data, previous) {
     });
 
 
-    // Attach nodes to their parent ways
+    // Attach nodes and ways
     _.each(d.ways, function(w) {
         newMembers = [];
         w.nodes.forEach(function(m) {
-                newMembers.push(d.nodes[m]);
+            newMembers.push(d.nodes[m]);
+            d.nodes[m].ways[w.id] = w;
         });
         w.nodes = newMembers;
         
