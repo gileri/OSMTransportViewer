@@ -34,6 +34,10 @@ var route_icons = {
     railway:    'lib/osmic/railway-station-14.png'
 };
 
+var defaultStatusMessages = {
+    "dl": "Downloading data from Overpass API"
+};
+
 L.LatLngBounds.prototype.trim = function (precision) {
     this._northEast.lat = this._northEast.lat.toFixed(precision);
     this._northEast.lng = this._northEast.lng.toFixed(precision);
@@ -152,6 +156,8 @@ function bindEvents() {
 }
 
 function updateStatus(status, msg) {
+    var level="info";
+
     $("li#data_tab i").removeClass().addClass("fa");
     switch (status) {
     case "ok":
@@ -163,6 +169,7 @@ function updateStatus(status, msg) {
         $("li#data_tab").addClass("disabled");
         break;
     case "fail":
+        level = "warning";
         $("li#data_tab").removeClass("disabled");
         $("li#data_tab i").addClass("fa-exclamation-triangle");
         break;
@@ -170,10 +177,19 @@ function updateStatus(status, msg) {
         break;
     }
 
+    var divMessage = "";
     if (msg) {
-        $("#data-error").text(msg);
+        divMessage = msg;
+    } else if (defaultStatusMessages[status] !== undefined) {
+        divMessage = defaultStatusMessages[status];
+    }
+    if (divMessage.length > 0) {
+        $("#data-status")
+            .removeClass()
+            .addClass(level)
+            .text(divMessage);
     } else {
-        $("#data-error").empty();
+        $("#data-status").empty();
     }
 }
 

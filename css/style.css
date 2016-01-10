@@ -107,13 +107,27 @@ li[class*='_route']>span:hover {
     margin-bottom: 15px;
 }
 
-div#data-error {
+div#data-status {
     margin-left: -20px;
     margin-right: -20px;
     margin-top: -15px;
     padding-left: 20px;
-    color: white;
-    background-color: red;
+}
+
+/* Stolen from bootstrap ! */
+div#data-status.error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+div#data-status.info {
+    background-color: #d9edf7;
+    color: #31708f;
+}
+
+div#data-status.warning {
+    background-color: #fdd608;
+    color: #8a6d3b;
 }
 
 div#routes_list>ul {
