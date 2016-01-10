@@ -91,15 +91,15 @@ li[class*='_route']>span:hover {
     border-spacing: 0px 10px;
 }
 
-.input-table>p {
+.input-table>div {
     display: table-row;
 }
 
-.input-table>p>label {
+.input-table>div>label {
     display: table-cell;
 }
 
-.input-table>p>input {
+.input-table>div>input {
     display: table-cell;
 }
 
