@@ -472,7 +472,7 @@ function displayRouteData(route) {
         });
         stop_ul.append(stop_li);
 
-        var platforms = findPlatform(route, member.stop_area);
+        var platforms = findPlatforms(route, member.stop_area);
         _.each(platforms, function (platform) {
             var platform_li = $("<li>");
             $("<a>", {href: osmUrl + platform.type + "/" + platform.id})
@@ -499,7 +499,7 @@ function displayRouteData(route) {
     });
 }
 
-function findPlatform(route, stop_area) {
+function findPlatforms(route, stop_area) {
 	if (!stop_area) {
 		return [];
     }
