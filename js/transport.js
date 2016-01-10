@@ -400,7 +400,7 @@ function displayRoutes(route_master) {
             .text(r.tags.name)
             .prop("title", r.tags.name)
             .attr("data-osmid", r.id)
-            .on("click", function (event) {
+            .on("click", function () {
                 $("#routes_list>ul>li>span").removeClass("selected_route");
                 $(this).addClass("selected_route");
                 updateURL();
