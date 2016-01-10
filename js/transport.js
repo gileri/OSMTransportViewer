@@ -511,11 +511,11 @@ function findPlatform(route, stop_area) {
 }
 
 function initOptions() {
-    for (var o in defaultOptions) {
+    _.each(defaultOptions, function(o) {
         if (!localStorage.getItem(o)) {
             localStorage.setItem(o, defaultOptions[o]);
         }
-    }
+    });
     $(".otv-settings").each(function () {
         $(this).val(localStorage.getItem($(this).attr('id')));
     });
