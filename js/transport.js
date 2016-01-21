@@ -323,8 +323,10 @@ function displayOnMap(route) {
 
         });
     });
-    map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
-    routeLayer.addTo(map);
+    if(routeLayer.getLayers().length > 0) {
+        map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
+        routeLayer.addTo(map);
+    }
 }
 
 function getTagTable(obj) {
