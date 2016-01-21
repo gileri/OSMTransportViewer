@@ -295,7 +295,9 @@ function getRouteMastersByParams(network, operator, ref, bbox) {
 function getRouteMasterById(id, done, fail, always) {
     if (parsed && parsed.route_masters[id]) {
         done(parsed.route_masters[id]);
-        always();
+        if (always !== null) {
+                always();
+        }
     } else {
         var base = 'relation["type"="route_master"](' + id + ')';
         updateStatus("dl");
