@@ -119,11 +119,11 @@ function parseOSM (data, previous) {
     });
 
     _.each(d.nodes, function(n) {
-        if(haveTag(d.nodes[n], 'public_transport', 'stop_position')) {
-            d.stop_positions[d.nodes[n].id] = d.nodes[n];
+        if(haveTag(n, 'public_transport', 'stop_position')) {
+            d.stop_positions[n.id] = n;
         }
-        else if (haveTag(d.nodes[n], 'public_transport', 'platform')) {
-            d.platforms[d.nodes[n].id] = d.nodes[n];
+        else if (haveTag(n, 'public_transport', 'platform')) {
+            d.platforms[n.id] = n;
         }
     });
 
