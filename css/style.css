@@ -89,6 +89,7 @@ li[class*='_route']>span:hover {
 #dlForm {
     display: table;
     border-spacing: 0px 10px;
+    width: 100%;
 }
 
 .input-table>div {
@@ -101,6 +102,10 @@ li[class*='_route']>span:hover {
 
 .input-table>div>input {
     display: table-cell;
+}
+
+.input-table>div>input[type="text"] {
+    width: 100%;
 }
 
 .sidebar-header {
