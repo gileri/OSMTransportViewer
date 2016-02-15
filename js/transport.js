@@ -332,9 +332,9 @@ function displayOnMap(route) {
 }
 
 function getTagTable(obj) {
-    var tagStr = "<table>";
+    var tagStr = "<table class='tags'>";
     Object.keys(obj.tags).forEach(function (key) {
-        tagStr += `<tr><td>${key}</td><td>${obj.tags[key].autoLink()}</td></tr>`;
+        tagStr += `<tr><td class='key'>${key}</td><td class='value'>${obj.tags[key].autoLink()}</td></tr>`;
     });
     tagStr += "</table>";
     return tagStr;

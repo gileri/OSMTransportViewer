@@ -165,3 +165,20 @@ ul#stops-list ul span{
 #routemaster-select {
     max-width: 100%;
 }
+
+table.tags {
+    width: 100%;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: left;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin: 10px 0px 10px 0px;
+    min-width: 250px;
+}
+
+table.tags td.key {
+    width: 120px;
+    background: rgba(0, 0, 0, 0.06);
+    word-wrap: break-word;
+}
