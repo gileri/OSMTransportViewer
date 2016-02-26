@@ -326,9 +326,9 @@ function displayOnMap(route) {
         });
     });
     if(routeLayer.getLayers().length > 0) {
-        if(window.innerWidth > mapPadding[0])
+        if(window.innerWidth > mapPadding[0]) {
             map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
-        else {
+        } else {
             map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds());
         }
         routeLayer.addTo(map);
