@@ -326,7 +326,11 @@ function displayOnMap(route) {
         });
     });
     if(routeLayer.getLayers().length > 0) {
-        map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
+        if(window.innerWidth > mapPadding[0])
+            map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
+        else {
+            map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds());
+        }
         routeLayer.addTo(map);
     }
 }
