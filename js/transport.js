@@ -488,7 +488,7 @@ function displayRouteData(route) {
                 .appendTo(platform_li);
             $("<span>")
                 .text("♿")
-                .addClass("wheelchair feature_" + member.tags.wheelchair)
+                .addClass("wheelchair feature_" + platform.tags.wheelchair)
                 .appendTo(platform_li);
             $("<span>")
                 .text(platform.tags.name || platform.id)
