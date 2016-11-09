@@ -2,6 +2,9 @@
 
 var parsed;
 var globalState = {};
+var map;
+var sidebar;
+var routeLayer;
 
 L.LatLngBounds.prototype.trim = function (precision) {
     this._northEast.lat = this._northEast.lat.toFixed(precision);
@@ -16,19 +19,20 @@ L.LatLngBounds.prototype.toXobbString = function () {
     return this._southWest.lat + "," + this._southWest.lng + "," + this._northEast.lat + "," + this._northEast.lng;
 };
 
-var map = L.map('map')
-               .setView(defaultMapView.coords, defaultMapView.zoom);
+var initMap = function() {
+    map = L.map('map')
+                   .setView(defaultMapView.coords, defaultMapView.zoom);
 
-// Ask user location. See map.on('locationfound')
-map.locate();
+    // Ask user location. See map.on('locationfound')
+    map.locate();
 
-L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18
-}).addTo(map);
+    L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(map);
 
-var sidebar = L.control.sidebar('sidebar').addTo(map);
-var routeLayer;
+    sidebar = L.control.sidebar('sidebar').addTo(map);
+}
 
 function updateURL() {
     var uri = URI();
@@ -440,5 +444,6 @@ function initOptions() {
 }
 
 initOptions();
+initMap();
 bindEvents();
 guessQuery();
