@@ -44,7 +44,7 @@ function getRouteMastersData(base, done, fail, always) {
 function getRouteMasterById(id, done, fail, always) {
     if (parsed && parsed.route_masters[id]) {
         done(parsed.route_masters[id]);
-        if (always !== null) {
+        if (always != null) {
                 always();
         }
     } else {
