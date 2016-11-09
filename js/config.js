@@ -19,7 +19,19 @@ var mapPadding = {
 var defaultOptions = {
     "otv-opapi": "//overpass-api.de/api",
     "otv-read_intro": false,
+    "otv-tiles": "osmfr",
 };
+
+var tiles = {
+    "osmfr": {
+        url: "//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+        maxZoom: 18
+    },
+    "osm": {
+        url: "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        maxZoom: 19
+    }
+}
 
 var route_icons = {
     bus:        'lib/osmic/bus-stop-14.png',

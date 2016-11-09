@@ -26,9 +26,9 @@ var initMap = function() {
     // Ask user location. See map.on('locationfound')
     map.locate();
 
-    L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer(tiles[localStorage.getItem("otv-tiles")].url, {
         attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18
+        maxZoom: tiles[localStorage.getItem("otv-tiles")].maxZoom
     }).addTo(map);
 
     sidebar = L.control.sidebar('sidebar').addTo(map);
