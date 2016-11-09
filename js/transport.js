@@ -1,42 +1,7 @@
 /*global $, L, URI*/
 
-var osmUrl = "//www.openstreetmap.org/";
-
-var path_color = {
-    bus: 'green',
-    subway: 'red',
-    trolleybus: 'yellow',
-    tramway: 'black',
-};
-
-var iconStopPosition = L.icon({
-    iconUrl: './img/stop_position_32.png',
-    iconSize: [12, 12]
-});
-
-var mapPadding = {
-    paddingTopLeft: [500, 50],
-};
-
-var defaultOptions = {
-    "otv-opapi": "//overpass-api.de/api",
-    "otv-read_intro": false,
-};
-
 var parsed;
 var globalState = {};
-
-var route_icons = {
-    bus:        'lib/osmic/bus-stop-14.png',
-    trolleybus: 'lib/osmic/bus-stop-14.png',
-    tram:       'lib/osmic/tram-stop-14.png',
-    subway:     'lib/osmic/metro-14.png',
-    railway:    'lib/osmic/railway-station-14.png'
-};
-
-var defaultStatusMessages = {
-    "dl": "Downloading data from Overpass API"
-};
 
 L.LatLngBounds.prototype.trim = function (precision) {
     this._northEast.lat = this._northEast.lat.toFixed(precision);
@@ -52,7 +17,7 @@ L.LatLngBounds.prototype.toXobbString = function () {
 };
 
 var map = L.map('map')
-               .setView([45.75840835, 4.8956966], 13);
+               .setView(defaultMapView.coords, defaultMapView.zoom);
 
 // Ask user location. See map.on('locationfound')
 map.locate();
@@ -194,6 +159,7 @@ function updateStatus(status, msg) {
 }
 
 function guessQuery() {
+    // Find what to do on page opening
     if (globalState.rmid) {
         getRouteMasterById(globalState.rmid);
         sidebar.open("data_display");
@@ -201,6 +167,7 @@ function guessQuery() {
         getRouteMastersByParams(globalState.network, globalState.operator, globalState.ref, globalState.bb);
         sidebar.open("data_display");
     } else if (! localStorage.getItem("otv-readIntro")){
+        // User has not yet read the help, and haven't made a request or been linked to one
         localStorage.setItem("otv-readIntro", true);
         sidebar.open("info-tab");
     } else {
@@ -231,49 +198,6 @@ function displayRouteMasters() {
     $("#routemaster-select").change();
 }
 
-function getRouteMastersData(base, done, fail, always) {
-    var query = '[out:json];' +
-    base + '->.route_masters;' +
-    'rel(r.route_masters)->.routes;' +
-    'node(r.routes)->.stops;' +
-    'way(r.routes)[~"(high|rail)way"~"."]->.paths;' +
-    'node(w.paths)->.paths_nodes;' +
-    '(' +
-      'node(r.routes:"platform");' +
-      'node(r.routes:"platform_entry_only");' +
-      'node(r.routes:"platform_exit_only");' +
-      'way (r.routes:"platform");' +
-      'way (r.routes:"platform_entry_only");' +
-      'way (r.routes:"platform_exit_only");' +
-    ');' +
-    '(._;>;)->.platforms;' +
-    '(' +
-      'relation(bn.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
-      'relation(bw.stops)["type"="public_transport"]["public_transport"="stop_area"];' +
-    ')->.stop_areas;' +
-    '(' +
-      '.route_masters;' +
-      '.routes;' +
-      '.stop_areas;' +
-      '.stops;' +
-      '.paths;' +
-      '.platforms;' +
-      '.paths_nodes;' +
-    ');' +
-    'out body;';
-
-    $("#dlForm>input[type=submit]").prop("disabled", true);
-    $("#data-error").empty();
-    $.ajax(localStorage.getItem("otv-opapi") + "/interpreter", {
-        type: "POST",
-        data: query,
-    }).done(function (data) {
-        parsed = parseOSM(data);
-        done();
-    }).fail(fail)
-      .always(always);
-}
-
 function getRouteMastersByParams(network, operator, ref, bbox) {
     updateStatus("dl");
 
@@ -290,19 +214,6 @@ function getRouteMastersByParams(network, operator, ref, bbox) {
         base = 'relation["type"="route_master"]' + netstr + opstr + refstr;
     }
     getRouteMastersData(base, displayRouteMasters);
-}
-
-function getRouteMasterById(id, done, fail, always) {
-    if (parsed && parsed.route_masters[id]) {
-        done(parsed.route_masters[id]);
-        if (always !== null) {
-                always();
-        }
-    } else {
-        var base = 'relation["type"="route_master"](' + id + ')';
-        updateStatus("dl");
-        getRouteMastersData(base, done, fail, always);
-    }
 }
 
 function clearMap() {
