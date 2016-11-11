@@ -231,13 +231,13 @@ function clearMap() {
 
 function displayOnMap(route) {
     _.each(route.stop_positions, function (obj) {
-        prepareMarker(obj, routeLayer);
+        makeMarker(obj, routeLayer);
     });
     _.each(route.platforms, function (obj) {
-        prepareMarker(obj, routeLayer);
+        makeMarker(obj, routeLayer);
     });
     _.each(route.paths, function (obj) {
-        prepareMarker(obj, routeLayer, {
+        makeMarker(obj, routeLayer, {
             color: path_color[route.tags.route] || "red",
 
         });
@@ -269,7 +269,7 @@ function getLatLngArray(osmWay) {
         return latlngs;
 }
 
-function prepareMarker(obj, group, overrideStyle) {
+function makeMarker(obj, group, overrideStyle) {
     var markerOptions = {
         autoPan: false
     };
