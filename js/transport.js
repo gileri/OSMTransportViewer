@@ -211,6 +211,8 @@ function getRouteMastersByParams(network, operator, ref, bbox) {
 
     var base;
     if (bbox) {
+        // Bounding-box filter only works with first-level members of relation
+        // It doesn't recurse into member relations
         bbox =   bbox ? ("(" + bbox + ")") : "";
         base = 'relation["type"="route"]' + bbox + ";" +
         'relation(br)' + netstr + opstr + refstr;
