@@ -25,11 +25,11 @@ var defaultOptions = {
 var tiles = {
     "osmfr": {
         url: "//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
-        maxZoom: 18
+        maxZoom: 19
     },
     "osm": {
         url: "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        maxZoom: 19
+        maxZoom: 18
     }
 }
 
