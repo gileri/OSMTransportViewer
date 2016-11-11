@@ -251,7 +251,7 @@ function displayOnMap(route) {
         });
     });
     if(routeLayer.getLayers().length > 0) {
-        if(window.innerWidth > mapPadding[0]) {
+        if(window.innerWidth > mapPadding["paddingTopLeft"][0]) {
             map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds(), mapPadding);
         } else {
             map.fitBounds(L.featureGroup(routeLayer.getLayers()).getBounds());
