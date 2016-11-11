@@ -13,7 +13,7 @@ var iconStopPosition = L.icon({
 });
 
 var mapPadding = {
-    paddingTopLeft: [500, 50],
+    paddingTopLeft: [500, 0],
 };
 
 var defaultOptions = {
