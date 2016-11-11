@@ -23,14 +23,14 @@ var defaultOptions = {
 };
 
 var tiles = {
-    "osmfr": {
-        url: "//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
-        maxZoom: 19
-    },
-    "osm": {
-        url: "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        maxZoom: 18
-    }
+    "osmfr": L.tileLayer("//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
+        attribution: 'map data &copy; <a href="//openstreetmap.org/copyright">openstreetmap</a> contributors',
+        maxzoom: 19
+    }),
+    "osm": L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="//openstreetmap.org/copyright">openstreetmap contributors</a>',
+        maxzoom: 18
+    }),
 }
 
 var route_icons = {

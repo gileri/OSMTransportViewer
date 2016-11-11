@@ -5,6 +5,7 @@ var globalState = {};
 var map;
 var sidebar;
 var routeLayer;
+var tileGroup;
 
 L.LatLngBounds.prototype.trim = function (precision) {
     this._northEast.lat = this._northEast.lat.toFixed(precision);
@@ -19,19 +20,23 @@ L.LatLngBounds.prototype.toXobbString = function () {
     return this._southWest.lat + "," + this._southWest.lng + "," + this._northEast.lat + "," + this._northEast.lng;
 };
 
+var setTiles = function(tile) {
+    if (tile) {
+        localStorage.setItem("otv-tiles", tile);
+    }
+    tileGroup.clearLayers();
+    tileGroup.addLayer(tiles[localStorage.getItem("otv-tiles")]);
+}
+
 var initMap = function() {
-    map = L.map('map')
-                   .setView(defaultMapView.coords, defaultMapView.zoom);
+    map = L.map('map').setView(defaultMapView.coords, defaultMapView.zoom);
+    tileGroup = L.layerGroup().addTo(map);
+    setTiles();
+
+    sidebar = L.control.sidebar('sidebar').addTo(map);
 
     // Ask user location. See map.on('locationfound')
     map.locate();
-
-    L.tileLayer(tiles[localStorage.getItem("otv-tiles")].url, {
-        attribution: 'Map data &copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: tiles[localStorage.getItem("otv-tiles")].maxZoom
-    }).addTo(map);
-
-    sidebar = L.control.sidebar('sidebar').addTo(map);
 }
 
 function updateURL() {
@@ -122,6 +127,9 @@ function bindEvents() {
                     updateStatus("fail", "Error while getting route_master data");
                 });
         });
+    $("#otv-tiles").on("change", function() {
+        setTiles();
+    });
 }
 
 function updateStatus(status, msg) {
