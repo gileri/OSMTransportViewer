@@ -246,7 +246,7 @@ function displayOnMap(route) {
     });
     _.each(route.paths, function (obj) {
         makeMarker(obj, routeLayer, {
-            color: path_color[route.tags.route] || "red",
+            color: route.tags.colour || path_color[route.tags.route] || "red",
 
         });
     });
