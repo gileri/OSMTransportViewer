@@ -300,8 +300,11 @@ function makeMarker(obj, group, overrideStyle) {
         if (obj.tags.public_transport === "stop_position") {
             obj.layer = L.marker([obj.lat, obj.lon], {
                 icon: iconStopPosition
-            })
-            .bindPopup(popupHTML, markerOptions);
+            }).bindPopup(popupHTML, markerOptions);
+        } else if (obj.tags.public_transport === "platform") {
+            obj.layer = L.marker([obj.lat, obj.lon], {
+                icon: platformIcon
+            }).bindPopup(popupHTML, markerOptions);
         } else {
             obj.layer = L.marker([obj.lat, obj.lon])
             .bindPopup(popupHTML, markerOptions);

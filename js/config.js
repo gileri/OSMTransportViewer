@@ -12,6 +12,11 @@ var iconStopPosition = L.icon({
     iconSize: [12, 12]
 });
 
+var platformIcon = L.icon({
+    iconUrl: './img/platform_14.png',
+    iconSize: [14, 14]
+});
+
 var mapPadding = {
     paddingTopLeft: [500, 0],
 };
